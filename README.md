@@ -1,3 +1,4 @@
+# Para acceder al menú le creamos un usuario -> Usuario del profe = carstiw y la Contraseña = #Car2026
 # Sistema web ZNI: análisis automático y predicción de energía
 
 Aplicativo web que convierte el análisis de la **prestación del servicio de energía en las Zonas No Interconectadas (ZNI) de Colombia** en un sistema que recibe datos nuevos, verifica si el modelo puede procesarlos, genera el análisis exploratorio, produce predicciones, exporta reportes y permite reentrenar el modelo con control de versiones.
