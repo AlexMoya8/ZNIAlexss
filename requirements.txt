@@ -1,7 +1,10 @@
 fastapi>=0.110
 uvicorn>=0.27
 python-multipart>=0.0.9
+<<<<<<< HEAD
 aiofiles>=23.1
+=======
+>>>>>>> da2da0a704b9b9be8e8c1e1cbcb185e49874d2e3
 pandas>=2.1
 numpy>=1.26
 scikit-learn>=1.4

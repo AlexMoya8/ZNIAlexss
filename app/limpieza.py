@@ -93,17 +93,25 @@ def limpiar(df_raw):
     df["DEPARTAMENTO_LIMPIO"] = df.LOC_KEY.map(
         df.groupby("LOC_KEY")["DEPARTAMENTO_LIMPIO"].agg(lambda s: s.value_counts().index[0]))
 
+<<<<<<< HEAD
     # Municipio: el código DANE más frecuente de la localidad y un nombre por código
     df["ID_MUN"] = df.LOC_KEY.map(df.groupby("LOC_KEY")["ID_MUN"].agg(lambda s: s.value_counts().index[0]))
     df["ID_DEP"] = df.ID_MUN // 1000
     df["MUNICIPIO_LIMPIO"] = df.ID_MUN.map(df.groupby("ID_MUN")["MUNICIPIO"].agg(_mejor_nombre)).str.strip()
 
+=======
+>>>>>>> da2da0a704b9b9be8e8c1e1cbcb185e49874d2e3
     fc = df.EA_KWH / (df.POT_KW * 24 * df.DIAS_MES)
     df["FACTOR_CARGA"] = fc.where((fc >= 0) & (fc <= 1))  # > 1 es físicamente imposible
 
     df = df.drop_duplicates(subset=["LOC_KEY", "ANIO", "MES"], keep="first")
+<<<<<<< HEAD
     return df[["LOC_KEY", "LOCALIDAD_LIMPIA", "ID_MUN", "MUNICIPIO_LIMPIO", "ID_DEP", "DEPARTAMENTO_LIMPIO",
                "ANIO", "MES", "EA_KWH", "HORAS_DIA", "FACTOR_CARGA"]].reset_index(drop=True)
+=======
+    return df[["LOC_KEY", "LOCALIDAD_LIMPIA", "DEPARTAMENTO_LIMPIO", "ANIO", "MES",
+               "EA_KWH", "HORAS_DIA", "FACTOR_CARGA"]].reset_index(drop=True)
+>>>>>>> da2da0a704b9b9be8e8c1e1cbcb185e49874d2e3
 
 
 def clasificar_tamano(mediana_kwh):

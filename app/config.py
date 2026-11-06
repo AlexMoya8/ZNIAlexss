@@ -7,6 +7,9 @@ BASE = Path(__file__).resolve().parent.parent
 DIR_MODELOS = Path(os.environ.get("ZNI_DIR_MODELOS", BASE / "modelos"))
 REGISTRO = DIR_MODELOS / "registro.json"
 DIR_PROCESOS = Path(os.environ.get("ZNI_DIR_PROCESOS", BASE / "datos" / "procesos"))  # resultados y reportes de cada carga
+<<<<<<< HEAD
 DIR_SEGURIDAD = Path(os.environ.get("ZNI_DIR_SEGURIDAD", BASE / "datos" / "seguridad"))  # usuarios y claves, nunca al repositorio
+=======
+>>>>>>> da2da0a704b9b9be8e8c1e1cbcb185e49874d2e3
 ESQUEMA_BASE = json.loads((BASE / "config" / "esquema.json").read_text(encoding="utf-8"))
 MAX_MB = 25

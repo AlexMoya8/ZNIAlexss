@@ -253,6 +253,10 @@
   "comparacion_algoritmos": {
     "HistGradientBoosting": 0.2663,
     "Ridge (lineal)": 0.2973,
+<<<<<<< HEAD
     "Ingenuo (repetir el mes anterior)": 0.3624
+=======
+    "Ingenuo (mismo valor del mes anterior)": 0.3624
+>>>>>>> da2da0a704b9b9be8e8c1e1cbcb185e49874d2e3
   }
 }

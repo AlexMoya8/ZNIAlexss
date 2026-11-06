@@ -6,10 +6,13 @@ Aplicativo web que convierte el análisis de la **prestación del servicio de en
 
 Proyecto de la Fundación Universitaria Uniclaretiana · Integrantes: Alex David Moya Bejarano y Alex David Garcia Chala · Docente: Carlos Stiwar Asprilla Mosquera.
 
+<<<<<<< HEAD
 ## Inicio rápido en Windows
 
 Descomprima el zip, entre a la carpeta `zni-app` (la que contiene `app`, `modelos` y este README) y haga **doble clic en `iniciar.bat`**. La primera vez instala las librerías; luego abre el sitio en el navegador. Para apagarlo, cierre la ventana negra.
 
+=======
+>>>>>>> da2da0a704b9b9be8e8c1e1cbcb185e49874d2e3
 ## Requisitos e instalación
 
 Python 3.10 o superior.
@@ -33,6 +36,7 @@ python -m scripts.generar_escenarios    # regenera los archivos de prueba
 uvicorn app.main:app --reload
 ```
 
+<<<<<<< HEAD
 - Página de presentación: <http://localhost:8000/> (explica el problema, cómo funciona el sistema, el modelo y el equipo)
 - Sistema: <http://localhost:8000/sistema.html> (botón «Entrar al sistema»)
 - Ingreso y registro de administradores: <http://localhost:8000/ingresar.html>
@@ -77,6 +81,19 @@ La forma más rápida es la sección **Archivos de prueba**: cada botón «Proba
 2. **Validar y predecir con un archivo incompatible:** cargue `03_tipo_incompatible.csv`. El estado sale *Incompatible*, se explica qué variable falla, qué se esperaba, qué se encontró y en qué filas. No se genera ninguna predicción.
 3. **Validar y predecir con un archivo compatible:** cargue `01_compatible.csv`. Se generan las predicciones con su intervalo del 80% y se descargan en CSV, Excel y HTML.
 4. **Modelo y versiones:** ingrese como administrador y cargue `08_nuevos_etiquetados.csv`. Se valida, se integra, se reentrena y aparece una versión **candidata** comparada con la activa. Escriba una justificación y elija activarla o conservar la activa.
+=======
+- Interfaz web: <http://localhost:8000/>
+- Documentación interactiva de la API (para probar cada operación): <http://localhost:8000/docs>
+
+La interfaz la sirve la misma API, así que no hay un segundo proceso que iniciar.
+
+## Prueba completa (demostración)
+
+1. **Analizar datos:** cargue `pruebas/escenarios/07_solo_eda_portal_crudo.csv`. El sistema detecta los tipos (incluye números en formato español y fechas), muestra faltantes, atípicos, frecuencias, correlaciones y gráficos, y deja descargar el reporte EDA.
+2. **Validar y predecir con un archivo incompatible:** cargue `03_tipo_incompatible.csv`. El estado sale *Incompatible*, se explica qué variable falla, qué se esperaba, qué se encontró y en qué filas. No se genera ninguna predicción.
+3. **Validar y predecir con un archivo compatible:** cargue `01_compatible.csv`. Se generan las predicciones con su intervalo del 80% y se descargan en CSV, Excel y HTML.
+4. **Modelo y versiones:** cargue `08_nuevos_etiquetados.csv`. Se valida, se integra, se reentrena y aparece una versión **candidata** comparada con la activa. Escriba una justificación y elija activarla o conservar la activa.
+>>>>>>> da2da0a704b9b9be8e8c1e1cbcb185e49874d2e3
 5. **Preparar archivo del portal:** cargue el CSV original del portal de datos abiertos y descargue la tabla lista para predecir el mes siguiente.
 
 ## Pruebas automáticas
@@ -85,7 +102,11 @@ La forma más rápida es la sección **Archivos de prueba**: cada botón «Proba
 pytest -q
 ```
 
+<<<<<<< HEAD
 Cubren los 8 escenarios obligatorios el acceso de administradores (registro, ingreso, bloqueo por intentos) la consulta por territorio y la administración de cuentas. Trabajan sobre una copia temporal de `modelos/`, así que no cambian el modelo real.
+=======
+Cubren los 8 escenarios obligatorios. Trabajan sobre una copia temporal de `modelos/`, así que no cambian el modelo real.
+>>>>>>> da2da0a704b9b9be8e8c1e1cbcb185e49874d2e3
 
 | # | Archivo | Resultado esperado |
 |---|---|---|
@@ -113,8 +134,11 @@ Cubren los 8 escenarios obligatorios el acceso de administradores (registro, ing
 | Actualizar y reentrenar | `POST /api/modelo/actualizar` |
 | Registrar decisión sobre una candidata | `POST /api/modelo/versiones/{version}/decision` |
 | Descargar reporte | `GET /api/reportes/{proceso}/{tipo}` |
+<<<<<<< HEAD
 | Historial de cargas | `GET /api/procesos` |
 | Archivos de prueba | `GET /api/escenarios` y `GET /api/escenarios/{archivo}` |
+=======
+>>>>>>> da2da0a704b9b9be8e8c1e1cbcb185e49874d2e3
 | Preparar CSV del portal | `POST /api/preparar` |
 
 ## Estructura
@@ -127,7 +151,11 @@ app/
   modelo.py        pipeline, validación temporal, predicción y versiones
   limpieza.py      limpieza del CSV del portal (la de la Actividad 3) y variables rezagadas
   reportes.py      reportes HTML
+<<<<<<< HEAD
   static/          sitio web (index.html, css/, js/, img/)
+=======
+  static/          interfaz web
+>>>>>>> da2da0a704b9b9be8e8c1e1cbcb185e49874d2e3
 config/esquema.json  variables, tipos, faltantes, categorías, rangos y exclusiones
 modelos/
   registro.json    versiones: activo, candidato, histórico
@@ -143,6 +171,7 @@ docs/              diagrama de arquitectura, documento técnico y evidencia de r
 `HistGradientBoostingRegressor` sobre log(1 + kWh), con validación temporal (entrena hasta 2024-06, prueba de 2024-07 a 2025-06). Métrica principal: MAE en escala log = **0,266**, un **26,5% menos error** que repetir el valor del mes anterior. Detalle en `docs/documento_tecnico.md`.
 
 ![Arquitectura](docs/arquitectura.png)
+<<<<<<< HEAD
 
 ## Experiencia pública y acceso administrativo
 
@@ -151,3 +180,5 @@ docs/              diagrama de arquitectura, documento técnico y evidencia de r
 - Las funciones técnicas (validación para predicción, predicción, preparación de datos, consulta del modelo, versiones, reportes técnicos, archivos de prueba y administración) requieren una sesión de administrador.
 - La API mantiene públicas las consultas territoriales y el análisis exploratorio `/api/eda`; las rutas técnicas están protegidas en el backend, no solamente ocultas en la interfaz.
 - Para administrar, ingrese desde el enlace **Ingresar como administrador** del menú lateral.
+=======
+>>>>>>> da2da0a704b9b9be8e8c1e1cbcb185e49874d2e3

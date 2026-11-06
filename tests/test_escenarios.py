@@ -15,13 +15,17 @@ def cliente(tmp_path_factory):
     shutil.copytree(BASE / "modelos", tmp / "modelos")  # no se tocan los modelos reales
     os.environ["ZNI_DIR_MODELOS"] = str(tmp / "modelos")
     os.environ["ZNI_DIR_PROCESOS"] = str(tmp / "procesos")
+<<<<<<< HEAD
     os.environ["ZNI_DIR_SEGURIDAD"] = str(tmp / "seguridad")
     os.environ["ZNI_CODIGO_REGISTRO"] = "CODIGO-PRUEBA"
+=======
+>>>>>>> da2da0a704b9b9be8e8c1e1cbcb185e49874d2e3
     from fastapi.testclient import TestClient
     from app.main import app
     return TestClient(app)
 
 
+<<<<<<< HEAD
 
 @pytest.fixture(scope="module")
 def admin_cliente(cliente):
@@ -31,6 +35,8 @@ def admin_cliente(cliente):
     return cliente
 
 
+=======
+>>>>>>> da2da0a704b9b9be8e8c1e1cbcb185e49874d2e3
 def enviar(cliente, ruta, archivo, **datos):
     with open(ESC / archivo, "rb") as f:
         return cliente.post(ruta, files={"archivo": (archivo, f, "text/csv")}, data=datos)
@@ -40,36 +46,60 @@ def niveles(r):
     return {(h["severidad"], h["nivel"], h["variable"]) for h in r.json()["diagnostico"]["hallazgos"]}
 
 
+<<<<<<< HEAD
 def test_1_compatible_genera_predicciones(admin_cliente):
     r = enviar(admin_cliente, "/api/predecir", "01_compatible.csv")
+=======
+def test_1_compatible_genera_predicciones(cliente):
+    r = enviar(cliente, "/api/predecir", "01_compatible.csv")
+>>>>>>> da2da0a704b9b9be8e8c1e1cbcb185e49874d2e3
     assert r.status_code == 200
     j = r.json()
     assert j["diagnostico"]["estado"] == "Compatible"
     assert j["resumen"]["registros"] == len(j["filas"]) > 0
     assert all(f["limite_inferior_80"] <= f["prediccion_kwh"] <= f["limite_superior_80"] for f in j["filas"])
+<<<<<<< HEAD
     assert admin_cliente.get(j["reportes"]["predicciones_csv"]).status_code == 200
 
 
 def test_2_falta_variable_bloquea(admin_cliente):
     r = enviar(admin_cliente, "/api/predecir", "02_falta_variable.csv")
+=======
+    assert cliente.get(j["reportes"]["predicciones_csv"]).status_code == 200
+
+
+def test_2_falta_variable_bloquea(cliente):
+    r = enviar(cliente, "/api/predecir", "02_falta_variable.csv")
+>>>>>>> da2da0a704b9b9be8e8c1e1cbcb185e49874d2e3
     assert r.status_code == 422
     assert ("error", "esquema", "energia_lag1_kwh") in niveles(r)
     assert "filas" not in r.json()
 
 
+<<<<<<< HEAD
 def test_3_tipo_incompatible(admin_cliente):
     r = enviar(admin_cliente, "/api/predecir", "03_tipo_incompatible.csv")
+=======
+def test_3_tipo_incompatible(cliente):
+    r = enviar(cliente, "/api/predecir", "03_tipo_incompatible.csv")
+>>>>>>> da2da0a704b9b9be8e8c1e1cbcb185e49874d2e3
     assert r.status_code == 422
     assert {("error", "tipo", "mes_objetivo"), ("error", "tipo", "energia_lag1_kwh")} <= niveles(r)
 
 
+<<<<<<< HEAD
 def test_4_faltantes_en_variable_necesaria(admin_cliente):
     r = enviar(admin_cliente, "/api/predecir", "04_faltantes.csv")
+=======
+def test_4_faltantes_en_variable_necesaria(cliente):
+    r = enviar(cliente, "/api/predecir", "04_faltantes.csv")
+>>>>>>> da2da0a704b9b9be8e8c1e1cbcb185e49874d2e3
     assert r.status_code == 422
     h = [h for h in r.json()["diagnostico"]["hallazgos"] if h["nivel"] == "contenido"][0]
     assert h["variable"] == "energia_lag1_kwh" and h["registros_afectados"] == 5
 
 
+<<<<<<< HEAD
 def test_5_categoria_nueva(admin_cliente):
     r = enviar(admin_cliente, "/api/predecir", "05a_categoria_nueva_departamento.csv")
     assert r.status_code == 200 and r.json()["diagnostico"]["estado"] == "Compatible con advertencias"
@@ -80,24 +110,48 @@ def test_5_categoria_nueva(admin_cliente):
 
 def test_6_columnas_adicionales(admin_cliente):
     r = enviar(admin_cliente, "/api/predecir", "06_columnas_adicionales.csv")
+=======
+def test_5_categoria_nueva(cliente):
+    r = enviar(cliente, "/api/predecir", "05a_categoria_nueva_departamento.csv")
+    assert r.status_code == 200 and r.json()["diagnostico"]["estado"] == "Compatible con advertencias"
+    assert sum(1 for f in r.json()["filas"] if f["aviso"]) == 3
+    r = enviar(cliente, "/api/predecir", "05b_categoria_fuera_de_escala.csv")
+    assert r.status_code == 422 and ("error", "contenido", "tamano") in niveles(r)
+
+
+def test_6_columnas_adicionales(cliente):
+    r = enviar(cliente, "/api/predecir", "06_columnas_adicionales.csv")
+>>>>>>> da2da0a704b9b9be8e8c1e1cbcb185e49874d2e3
     assert r.status_code == 200
     assert r.json()["diagnostico"]["columnas_adicionales"] == ["operador", "observaciones"]
 
 
+<<<<<<< HEAD
 def test_7_no_predice_pero_si_eda(admin_cliente):
     r = enviar(admin_cliente, "/api/predecir", "07_solo_eda_portal_crudo.csv")
     assert r.status_code == 422 and "sugerencia" in r.json()["diagnostico"]
     r = enviar(admin_cliente, "/api/eda", "07_solo_eda_portal_crudo.csv")
+=======
+def test_7_no_predice_pero_si_eda(cliente):
+    r = enviar(cliente, "/api/predecir", "07_solo_eda_portal_crudo.csv")
+    assert r.status_code == 422 and "sugerencia" in r.json()["diagnostico"]
+    r = enviar(cliente, "/api/eda", "07_solo_eda_portal_crudo.csv")
+>>>>>>> da2da0a704b9b9be8e8c1e1cbcb185e49874d2e3
     assert r.status_code == 200
     tipos = {v["variable"]: v["tipo"] for v in r.json()["eda"]["variables"]}
     assert tipos["ENERGÍA ACTIVA"] == "numérica" and tipos["FECHA DE DEMANDA MÁXIMA"] == "temporal"
     assert len(r.json()["graficos"]) >= 5
+<<<<<<< HEAD
     r = enviar(admin_cliente, "/api/predecir", "07b_reglas_de_dominio.csv")
+=======
+    r = enviar(cliente, "/api/predecir", "07b_reglas_de_dominio.csv")
+>>>>>>> da2da0a704b9b9be8e8c1e1cbcb185e49874d2e3
     assert {h["variable"] for h in r.json()["diagnostico"]["hallazgos"] if h["nivel"] == "dominio"} == {
         "horas_dia_lag1", "factor_carga_lag1", "sin_servicio_lag1 / energia_lag1_kwh"}
 
 
 def test_8_actualizacion_genera_candidata_sin_reemplazar(cliente):
+<<<<<<< HEAD
     from fastapi.testclient import TestClient
     from app.main import app
     anon = TestClient(app)
@@ -116,12 +170,26 @@ def test_8_actualizacion_genera_candidata_sin_reemplazar(cliente):
     assert r.status_code == 200
     assert anon.get("/api/modelo").json()["version"] == j["version_candidata"]
     estados = {v["version"]: v["estado"] for v in anon.get("/api/modelo/versiones").json()["versiones"]}
+=======
+    r = enviar(cliente, "/api/modelo/actualizar", "08_nuevos_etiquetados.csv")
+    assert r.status_code == 200
+    j = r.json()
+    estados = {v["version"]: v["estado"] for v in cliente.get("/api/modelo/versiones").json()["versiones"]}
+    assert estados["v1"] == "activo" and estados[j["version_candidata"]] == "candidato"
+    assert cliente.get("/api/modelo").json()["version"] == "v1"  # no se sustituye sola
+    r = cliente.post(f"/api/modelo/versiones/{j['version_candidata']}/decision",
+                     data={"accion": "activar", "justificacion": "prueba automática del flujo", "proceso": j["proceso"]})
+    assert r.status_code == 200
+    assert cliente.get("/api/modelo").json()["version"] == j["version_candidata"]
+    estados = {v["version"]: v["estado"] for v in cliente.get("/api/modelo/versiones").json()["versiones"]}
+>>>>>>> da2da0a704b9b9be8e8c1e1cbcb185e49874d2e3
     assert estados["v1"] == "historico"
 
 
 def test_archivo_ilegible_sin_traza(cliente):
     r = cliente.post("/api/eda", files={"archivo": ("x.pdf", b"%PDF-1.4", "application/pdf")})
     assert r.status_code == 400 and "Traceback" not in r.text
+<<<<<<< HEAD
 
 
 def test_sitio_y_recursos(admin_cliente):
@@ -239,3 +307,5 @@ def test_crud_de_administradores_e_historial(cliente):
 
     assert cliente.delete("/api/admin/usuarios/stiwar").status_code == 200
     assert "stiwar" not in {u["usuario"] for u in cliente.get("/api/admin/usuarios").json()["usuarios"]}
+=======
+>>>>>>> da2da0a704b9b9be8e8c1e1cbcb185e49874d2e3

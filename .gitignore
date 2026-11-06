@@ -3,4 +3,7 @@ __pycache__/
 .venv/
 datos/procesos/
 .pytest_cache/
+<<<<<<< HEAD
 datos/seguridad/
+=======
+>>>>>>> da2da0a704b9b9be8e8c1e1cbcb185e49874d2e3

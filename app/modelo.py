@@ -205,7 +205,11 @@ def entrenar_version(datos, estado, nota="", comparacion_algoritmos=False):
         meta["comparacion_algoritmos"] = {
             "HistGradientBoosting": m["mae_log"],
             "Ridge (lineal)": validar(datos, "ridge")[1]["mae_log"],
+<<<<<<< HEAD
             "Ingenuo (repetir el mes anterior)": m["mae_log_ingenuo"],
+=======
+            "Ingenuo (mismo valor del mes anterior)": m["mae_log_ingenuo"],
+>>>>>>> da2da0a704b9b9be8e8c1e1cbcb185e49874d2e3
         }
     (carpeta / "metadatos.json").write_text(json.dumps(meta, ensure_ascii=False, indent=2), encoding="utf-8")
 
@@ -232,7 +236,11 @@ def predecir(v, entrada):
     return pred, np.clip(lo, 0, None), hi
 
 
+<<<<<<< HEAD
 def decidir(version, accion, justificacion, usuario=""):
+=======
+def decidir(version, accion, justificacion):
+>>>>>>> da2da0a704b9b9be8e8c1e1cbcb185e49874d2e3
     """accion = 'activar' (la candidata reemplaza a la activa) o 'descartar' (la candidata pasa a histórico)."""
     reg = leer_registro()
     cand = next((v for v in reg["versiones"] if v["version"] == version), None)
@@ -243,11 +251,19 @@ def decidir(version, accion, justificacion, usuario=""):
         for v in reg["versiones"]:
             if v["estado"] == "activo":
                 v["estado"] = "historico"
+<<<<<<< HEAD
                 v["decision"] = {"fecha": ahora, "accion": f"reemplazada por {version}", "justificacion": justificacion,
                                  "usuario": usuario}
         cand["estado"] = "activo"
     else:
         cand["estado"] = "historico"
     cand["decision"] = {"fecha": ahora, "accion": accion, "justificacion": justificacion, "usuario": usuario}
+=======
+                v["decision"] = {"fecha": ahora, "accion": f"reemplazada por {version}", "justificacion": justificacion}
+        cand["estado"] = "activo"
+    else:
+        cand["estado"] = "historico"
+    cand["decision"] = {"fecha": ahora, "accion": accion, "justificacion": justificacion}
+>>>>>>> da2da0a704b9b9be8e8c1e1cbcb185e49874d2e3
     guardar_registro(reg)
     return cand

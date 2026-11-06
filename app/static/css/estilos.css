@@ -146,6 +146,7 @@ label.campo { display: block; font-size: 14px; font-weight: 600; margin: 14px 0 
   .heroe { padding: 22px; } .heroe h1 { font-size: 24px; }
   .graficos { grid-template-columns: 1fr; }
 }
+<<<<<<< HEAD
 
 /* ---------- cuenta y acceso de administradores */
 [hidden] { display: none !important; }
@@ -268,3 +269,5 @@ body.es-admin .pagina-publica { max-width:1540px; }
  .acceso-documentos strong { margin-left:58px; }
  .panel-explorador { padding:14px; }
 }
+=======
+>>>>>>> da2da0a704b9b9be8e8c1e1cbcb185e49874d2e3

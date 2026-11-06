@@ -6,20 +6,32 @@ import io
 import json
 import logging
 import uuid
+<<<<<<< HEAD
 from contextlib import asynccontextmanager
+=======
+>>>>>>> da2da0a704b9b9be8e8c1e1cbcb185e49874d2e3
 from datetime import datetime
 
 import numpy as np
 import pandas as pd
+<<<<<<< HEAD
 from fastapi import Depends, FastAPI, File, Form, HTTPException, Query, Request, Response, UploadFile
 from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 
 from . import eda, limpieza, modelo, reportes, seguridad, territorio
+=======
+from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
+from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
+from fastapi.staticfiles import StaticFiles
+
+from . import eda, limpieza, modelo, reportes
+>>>>>>> da2da0a704b9b9be8e8c1e1cbcb185e49874d2e3
 from .config import BASE, DIR_PROCESOS, MAX_MB
 from .validacion import INCOMPATIBLE, ArchivoIlegible, leer_archivo, validar
 
 log = logging.getLogger("zni")
+<<<<<<< HEAD
 
 
 @asynccontextmanager
@@ -31,6 +43,9 @@ async def al_iniciar(_app):
 
 app = FastAPI(lifespan=al_iniciar,
               title="Sistema ZNI: energía del mes siguiente por localidad",
+=======
+app = FastAPI(title="Sistema ZNI: energía del mes siguiente por localidad",
+>>>>>>> da2da0a704b9b9be8e8c1e1cbcb185e49874d2e3
               description="Análisis exploratorio automático, validación de compatibilidad, predicción, reportes y "
                           "actualización versionada del modelo de energía activa en las Zonas No Interconectadas.",
               version="1.0")
@@ -40,6 +55,7 @@ REPORTES = {"eda": "eda.html", "compatibilidad": "compatibilidad.html", "compati
             "predicciones_xlsx": "predicciones.xlsx", "actualizacion": "actualizacion.html"}
 
 
+<<<<<<< HEAD
 @app.middleware("http")
 async def sin_cache(request: Request, call_next):
     """Evita que el navegador muestre una versión vieja del sitio después de actualizarlo."""
@@ -49,6 +65,8 @@ async def sin_cache(request: Request, call_next):
     return respuesta
 
 
+=======
+>>>>>>> da2da0a704b9b9be8e8c1e1cbcb185e49874d2e3
 @app.exception_handler(Exception)
 async def error_general(request: Request, exc: Exception):
     log.exception("Error no controlado")
@@ -74,9 +92,14 @@ def _nuevo_proceso(tipo, archivo):
     pid = datetime.now().strftime("%Y%m%d-%H%M%S-") + uuid.uuid4().hex[:6]
     carpeta = DIR_PROCESOS / pid
     carpeta.mkdir(parents=True, exist_ok=True)
+<<<<<<< HEAD
     (carpeta / "proceso.json").write_text(json.dumps({"tipo": tipo, "archivo": archivo,
                                                       "fecha": datetime.now().isoformat(timespec="seconds")},
                                                      ensure_ascii=False), encoding="utf-8")
+=======
+    (carpeta / "proceso.json").write_text(json.dumps({"tipo": tipo, "archivo": archivo}, ensure_ascii=False),
+                                          encoding="utf-8")
+>>>>>>> da2da0a704b9b9be8e8c1e1cbcb185e49874d2e3
     return pid, carpeta
 
 
@@ -119,8 +142,12 @@ async def analizar_dataset(archivo: UploadFile = File(...)):
 
 
 @app.post("/api/validar", tags=["Validación"], summary="Validar compatibilidad con el modelo activo")
+<<<<<<< HEAD
 async def validar_compatibilidad(archivo: UploadFile = File(...), modo: str = Form("prediccion"),
                                admin: dict = Depends(seguridad.requiere_admin)):
+=======
+async def validar_compatibilidad(archivo: UploadFile = File(...), modo: str = Form("prediccion")):
+>>>>>>> da2da0a704b9b9be8e8c1e1cbcb185e49874d2e3
     if modo not in ("prediccion", "actualizacion"):
         raise HTTPException(400, "modo debe ser 'prediccion' o 'actualizacion'.")
     _, meta = _activa()
@@ -131,7 +158,11 @@ async def validar_compatibilidad(archivo: UploadFile = File(...), modo: str = Fo
 
 
 @app.post("/api/predecir", tags=["Predicción"], summary="Generar predicciones (solo con datos compatibles)")
+<<<<<<< HEAD
 async def generar_predicciones(archivo: UploadFile = File(...), admin: dict = Depends(seguridad.requiere_admin)):
+=======
+async def generar_predicciones(archivo: UploadFile = File(...)):
+>>>>>>> da2da0a704b9b9be8e8c1e1cbcb185e49874d2e3
     v, meta = _activa()
     df, nombre = await _leer(archivo)
     pid, carpeta = _nuevo_proceso("prediccion", nombre)
@@ -169,18 +200,30 @@ async def generar_predicciones(archivo: UploadFile = File(...), admin: dict = De
 
 
 @app.get("/api/modelo", tags=["Modelo"], summary="Consultar modelo activo")
+<<<<<<< HEAD
 def modelo_activo(admin: dict = Depends(seguridad.requiere_admin)):
+=======
+def modelo_activo():
+>>>>>>> da2da0a704b9b9be8e8c1e1cbcb185e49874d2e3
     _, meta = _activa()
     return meta
 
 
 @app.get("/api/modelo/versiones", tags=["Modelo"], summary="Listar versiones (activo, candidato, histórico)")
+<<<<<<< HEAD
 def versiones(admin: dict = Depends(seguridad.requiere_admin)):
+=======
+def versiones():
+>>>>>>> da2da0a704b9b9be8e8c1e1cbcb185e49874d2e3
     return modelo.leer_registro()
 
 
 @app.post("/api/modelo/actualizar", tags=["Modelo"], summary="Actualizar datos y reentrenar (genera una candidata)")
+<<<<<<< HEAD
 async def actualizar(archivo: UploadFile = File(...), admin: dict = Depends(seguridad.requiere_admin)):
+=======
+async def actualizar(archivo: UploadFile = File(...)):
+>>>>>>> da2da0a704b9b9be8e8c1e1cbcb185e49874d2e3
     v_act, meta = _activa()
     df, nombre = await _leer(archivo)
     pid, carpeta = _nuevo_proceso("actualizacion", nombre)
@@ -206,7 +249,11 @@ async def actualizar(archivo: UploadFile = File(...), admin: dict = Depends(segu
                                  "conjunto de entrenamiento o tienen energía 0. No se generó una versión candidata.")
     despues = pd.concat([antes, integrar], ignore_index=True)
 
+<<<<<<< HEAD
     version, meta_c = modelo.entrenar_version(despues, estado="candidato", nota=f"Actualización con {nombre} (por {admin['usuario']})")
+=======
+    version, meta_c = modelo.entrenar_version(despues, estado="candidato", nota=f"Actualización con {nombre}")
+>>>>>>> da2da0a704b9b9be8e8c1e1cbcb185e49874d2e3
     # Comparación justa adicional: registros nuevos que ninguna versión vio al estimar su error.
     _, prueba, _ = modelo.separar_temporal(modelo.entrenables(despues))
     eval_nuevos = modelo.entrenables(integrar).merge(prueba[clave], on=clave)
@@ -270,21 +317,33 @@ async def actualizar(archivo: UploadFile = File(...), admin: dict = Depends(segu
 
 @app.post("/api/modelo/versiones/{version}/decision", tags=["Modelo"],
           summary="Registrar la decisión sobre una versión candidata")
+<<<<<<< HEAD
 def decidir(version: str, accion: str = Form(...), justificacion: str = Form(...), proceso: str = Form(""),
             admin: dict = Depends(seguridad.requiere_admin)):
+=======
+def decidir(version: str, accion: str = Form(...), justificacion: str = Form(...), proceso: str = Form("")):
+>>>>>>> da2da0a704b9b9be8e8c1e1cbcb185e49874d2e3
     if accion not in ("activar", "descartar"):
         raise HTTPException(400, "accion debe ser 'activar' o 'descartar'.")
     if len(justificacion.strip()) < 10:
         raise HTTPException(400, "Escriba una justificación de al menos 10 caracteres.")
     try:
+<<<<<<< HEAD
         v = modelo.decidir(version, accion, justificacion.strip(), admin["usuario"])
+=======
+        v = modelo.decidir(version, accion, justificacion.strip())
+>>>>>>> da2da0a704b9b9be8e8c1e1cbcb185e49874d2e3
     except ValueError as e:
         raise HTTPException(400, str(e))
     carpeta = DIR_PROCESOS / proceso
     if proceso and (carpeta / "actualizacion.json").exists():  # deja la decisión escrita en el reporte
         act = json.loads((carpeta / "actualizacion.json").read_text(encoding="utf-8"))
+<<<<<<< HEAD
         act["decision"] = (f"{v['decision']['fecha']}: {accion} {version} (por {admin['usuario']}). "
                            f"Justificación: {justificacion.strip()}")
+=======
+        act["decision"] = f"{v['decision']['fecha']}: {accion} {version}. Justificación: {justificacion.strip()}"
+>>>>>>> da2da0a704b9b9be8e8c1e1cbcb185e49874d2e3
         (carpeta / "actualizacion.json").write_text(json.dumps(act, ensure_ascii=False, indent=2), encoding="utf-8")
         (carpeta / "actualizacion.html").write_text(reportes.html_actualizacion(act), encoding="utf-8")
     return {"version": v, "registro": modelo.leer_registro()}
@@ -292,8 +351,12 @@ def decidir(version: str, accion: str = Form(...), justificacion: str = Form(...
 
 @app.post("/api/preparar", tags=["Utilidades"],
           summary="Convertir el CSV del portal de datos abiertos en la tabla de entrada del modelo")
+<<<<<<< HEAD
 async def preparar(archivo: UploadFile = File(...), tipo: str = Form("prediccion"),
                    admin: dict = Depends(seguridad.requiere_admin)):
+=======
+async def preparar(archivo: UploadFile = File(...), tipo: str = Form("prediccion")):
+>>>>>>> da2da0a704b9b9be8e8c1e1cbcb185e49874d2e3
     """tipo='prediccion': filas del mes siguiente al último del archivo. tipo='etiquetados': pares con objetivo real."""
     df, nombre = await _leer(archivo)
     faltan = limpieza.faltan_columnas_crudas(df)
@@ -309,6 +372,7 @@ async def preparar(archivo: UploadFile = File(...), tipo: str = Form("prediccion
 
 
 @app.get("/api/reportes/{proceso}/{tipo}", tags=["Reportes"], summary="Descargar un reporte generado")
+<<<<<<< HEAD
 def descargar_reporte(proceso: str, tipo: str, request: Request):
     if tipo not in REPORTES or not proceso.replace("-", "").isalnum():
         raise HTTPException(404, "Reporte no encontrado.")
@@ -319,11 +383,18 @@ def descargar_reporte(proceso: str, tipo: str, request: Request):
         if info.get("tipo") != "eda" and not seguridad.usuario_actual(request):
             raise HTTPException(401, "Esta operación requiere una cuenta de administrador.")
     ruta = carpeta / REPORTES[tipo]
+=======
+def descargar_reporte(proceso: str, tipo: str):
+    if tipo not in REPORTES or not proceso.replace("-", "").isalnum():
+        raise HTTPException(404, "Reporte no encontrado.")
+    ruta = DIR_PROCESOS / proceso / REPORTES[tipo]
+>>>>>>> da2da0a704b9b9be8e8c1e1cbcb185e49874d2e3
     if not ruta.exists():
         raise HTTPException(404, "Ese reporte no existe para este proceso.")
     return FileResponse(ruta, filename=f"{tipo}_{proceso}{ruta.suffix}")
 
 
+<<<<<<< HEAD
 # ---------------------------------------------------------------- acceso de administradores
 
 def _cliente(request: Request):
@@ -499,4 +570,6 @@ def territorio_csv(filtros: dict = Depends(_filtros)):
                              headers={"Content-Disposition": 'attachment; filename="registros_zni.csv"'})
 
 
+=======
+>>>>>>> da2da0a704b9b9be8e8c1e1cbcb185e49874d2e3
 app.mount("/", StaticFiles(directory=BASE / "app" / "static", html=True), name="interfaz")

@@ -5,7 +5,11 @@ const fmt = (v, d = 0) => typeof v === 'number' ? v.toLocaleString('es-CO', {max
 const clase = e => e === 'Compatible' ? 'ok' : e === 'Compatible con advertencias' ? 'adv' : 'err';
 const cargando = t => `<div class="cargando"><span class="giro"></span>${esc(t)}</div>`;
 const error = m => `<div class="msg err">${esc(m)}</div>`;
+<<<<<<< HEAD
 const PAGINAS = ['inicio', 'mapa', 'analizar', 'predecir', 'preparar', 'modelo', 'reportes', 'ejemplos', 'acerca', 'admin'];
+=======
+const PAGINAS = ['inicio', 'analizar', 'predecir', 'preparar', 'modelo', 'reportes', 'ejemplos', 'acerca'];
+>>>>>>> da2da0a704b9b9be8e8c1e1cbcb185e49874d2e3
 const NOMBRES_REPORTE = {eda: 'Reporte EDA', compatibilidad: 'Compatibilidad', compatibilidad_json: 'Compatibilidad (JSON)',
   predicciones_csv: 'Predicciones CSV', predicciones_xlsx: 'Predicciones Excel', predicciones_html: 'Reporte de predicciones',
   actualizacion: 'Reporte de actualización'};
@@ -13,8 +17,12 @@ const TIPOS_PROCESO = {eda: 'Análisis exploratorio', validacion: 'Validación',
 
 // ---------------------------------------------------------------- navegación
 function ir() {
+<<<<<<< HEAD
   let p = PAGINAS.includes(location.hash.slice(1)) ? location.hash.slice(1) : 'mapa';
   if (!document.body.classList.contains('es-admin') && ['inicio','predecir','preparar','modelo','reportes','ejemplos','admin'].includes(p)) p = 'mapa';
+=======
+  const p = PAGINAS.includes(location.hash.slice(1)) ? location.hash.slice(1) : 'inicio';
+>>>>>>> da2da0a704b9b9be8e8c1e1cbcb185e49874d2e3
   PAGINAS.forEach(x => $(`#p-${x}`).classList.toggle('activa', x === p));
   document.querySelectorAll('.lateral a.nav').forEach(a => a.toggleAttribute('aria-current', a.getAttribute('href') === `#${p}`));
   document.querySelectorAll('.lateral a.nav[aria-current]').forEach(a => a.setAttribute('aria-current', 'page'));
@@ -22,8 +30,11 @@ function ir() {
   window.scrollTo(0, 0);
   if (p === 'reportes') cargarReportes();
   if (p === 'ejemplos') cargarEjemplos();
+<<<<<<< HEAD
   if (p === 'mapa' && typeof cargarMapa === 'function') cargarMapa();
   if (p === 'admin' && typeof cargarAdmin === 'function') cargarAdmin();
+=======
+>>>>>>> da2da0a704b9b9be8e8c1e1cbcb185e49874d2e3
 }
 window.addEventListener('hashchange', ir);
 $('#abrir-menu').onclick = e => { e.stopPropagation(); $('#lateral').classList.toggle('abierta'); };
@@ -273,16 +284,24 @@ function vistaAct(j) {
     <div id="r-dec"></div>${enlaces(j.reportes)}`;
 }
 async function actualizar() {
+<<<<<<< HEAD
   if (!USUARIO) { location.hash = '#modelo'; $('#r-act').innerHTML = ''; return; }
+=======
+>>>>>>> da2da0a704b9b9be8e8c1e1cbcb185e49874d2e3
   const f = archivos.act;
   if (!f) { $('#r-act').innerHTML = error('Elija primero un archivo con la energía real.'); return; }
   $('#r-act').innerHTML = cargando('Validando, integrando y reentrenando… puede tardar unos segundos.');
   try {
+<<<<<<< HEAD
     const {ok, status, j} = await enviar('/api/modelo/actualizar', f);
     if (!ok) {
       if (status === 401) { await cargarCuenta(); $('#r-act').innerHTML = error('Su sesión venció. Ingrese de nuevo para entrenar el modelo.'); return; }
       $('#r-act').innerHTML = (j.diagnostico ? vistaDiag(j.diagnostico, j.reportes) : '') + error(detalle(j)); return;
     }
+=======
+    const {ok, j} = await enviar('/api/modelo/actualizar', f);
+    if (!ok) { $('#r-act').innerHTML = (j.diagnostico ? vistaDiag(j.diagnostico, j.reportes) : '') + error(detalle(j)); return; }
+>>>>>>> da2da0a704b9b9be8e8c1e1cbcb185e49874d2e3
     $('#r-act').innerHTML = vistaAct(j); cargarVersiones();
     $('#r-act').querySelectorAll('button[data-a]').forEach(b => b.onclick = () => conBoton(b, async () => {
       const just = $('#just').value.trim();
@@ -331,6 +350,7 @@ async function cargarEjemplos() {
   } catch { $('#r-ejemplos').innerHTML = error('No se pudieron cargar los archivos de prueba.'); }
 }
 
+<<<<<<< HEAD
 // ---------------------------------------------------------------- cuenta de administrador
 let USUARIO = null;
 async function cargarCuenta() {
@@ -353,4 +373,7 @@ async function cargarCuenta() {
 }
 
 cargarCuenta().then(() => { if (USUARIO) cargarModelo(); });
+=======
+cargarModelo();
+>>>>>>> da2da0a704b9b9be8e8c1e1cbcb185e49874d2e3
 ir();
