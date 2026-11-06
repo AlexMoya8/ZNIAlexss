@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ingresar · Energía ZNI</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%231f6fcf'/%3E%3Cpath d='M13 4 6 13h5l-1 7 7-9h-5z' fill='white'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="css/estilos.css">
+<style>
+  body { min-height: 100vh; display: grid; grid-template-columns: 1fr 1fr; }
+  .lado-info { background: linear-gradient(160deg, #1f6fcf, #0d3f7f); color: #fff; padding: 48px; display: flex; flex-direction: column; justify-content: space-between; }
+  .lado-info a.marca { color: #fff; display: flex; align-items: center; gap: 10px; text-decoration: none; font-weight: 700; }
+  .lado-info h1 { font-size: 34px; line-height: 1.15; letter-spacing: -.02em; margin: 0 0 14px; max-width: 16ch; }
+  .lado-info p { color: rgba(255,255,255,.85); max-width: 44ch; margin: 0; }
+  .lado-info ul { padding-left: 18px; color: rgba(255,255,255,.85); font-size: 14px; } .lado-info li { margin: 6px 0; }
+  .lado-form { display: grid; place-items: center; padding: 32px 20px; background: var(--panel); }
+  .caja { width: 100%; max-width: 400px; }
+  .pestanas { display: grid; grid-template-columns: 1fr 1fr; background: var(--panel-2); border-radius: 10px; padding: 4px; margin-bottom: 22px; }
+  .pestanas button { border: none; background: none; padding: 9px; border-radius: 8px; font: inherit; font-weight: 600; color: var(--ink-2); cursor: pointer; }
+  .pestanas button[aria-selected="true"] { background: var(--panel); color: var(--ink); box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+  .caja h2 { font-size: 22px; margin: 0 0 4px; }
+  .caja input { width: 100%; font: inherit; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); color: var(--ink); }
+  .caja input:focus { outline: 2px solid var(--acc-2); border-color: var(--acc); }
+  .caja label.campo { margin-top: 14px; }
+  .caja .btn { width: 100%; justify-content: center; margin-top: 20px; padding: 11px; }
+  .ayuda-campo { font-size: 12px; color: var(--ink-3); margin-top: 4px; }
+  .volver { display: inline-block; margin-top: 18px; font-size: 14px; }
+  @media (max-width: 860px) { body { grid-template-columns: 1fr; } .lado-info { padding: 28px 20px; gap: 18px; } .lado-info h1 { font-size: 26px; } .lado-info ul { display: none; } }
+</style>
+</head>
+<body>
+<aside class="lado-info">
+  <a class="marca" href="/"><svg width="30" height="30" viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="7" fill="#fff"/><path d="M13 4 6 13h5l-1 7 7-9h-5z" fill="#1f6fcf"/></svg>Energía ZNI</a>
+  <div>
+    <h1>Acceso para administradores</h1>
+    <p>Solo los administradores pueden reentrenar el modelo y decidir qué versión queda activa. Consultar, validar y predecir no requiere cuenta.</p>
+    <ul><li>Contraseñas guardadas cifradas</li><li>Sesión que vence a las 8 horas</li><li>Bloqueo temporal tras varios intentos fallidos</li></ul>
+  </div>
+  <small style="color:rgba(255,255,255,.7)">Fundación Universitaria Uniclaretiana</small>
+</aside>
+<main class="lado-form">
+  <div class="caja">
+    <div class="pestanas" role="tablist">
+      <button role="tab" aria-selected="true" data-p="ingresar">Ingresar</button>
+      <button role="tab" aria-selected="false" data-p="registro">Crear cuenta</button>
+    </div>
+
+    <form id="f-ingresar" autocomplete="on">
+      <h2>Bienvenido de nuevo</h2>
+      <p class="ayuda">Ingrese con su cuenta de administrador.</p>
+      <label class="campo" for="i-usuario">Usuario</label>
+      <input id="i-usuario" name="usuario" autocomplete="username" required>
+      <label class="campo" for="i-contrasena">Contraseña</label>
+      <input id="i-contrasena" name="contrasena" type="password" autocomplete="current-password" required>
+      <button class="btn" type="submit">Ingresar</button>
+      <div id="m-ingresar"></div>
+    </form>
+
+    <form id="f-registro" hidden autocomplete="off">
+      <h2>Crear cuenta de administrador</h2>
+      <p class="ayuda">Necesita el código de registro del proyecto.</p>
+      <label class="campo" for="r-nombre">Nombre</label>
+      <input id="r-nombre" name="nombre" autocomplete="name" required>
+      <label class="campo" for="r-usuario">Usuario</label>
+      <input id="r-usuario" name="usuario" autocomplete="username" required pattern="[a-zA-Z0-9_.\-]{3,30}">
+      <div class="ayuda-campo">De 3 a 30 caracteres: letras, números, punto o guion.</div>
+      <label class="campo" for="r-contrasena">Contraseña</label>
+      <input id="r-contrasena" name="contrasena" type="password" autocomplete="new-password" required minlength="8">
+      <div class="ayuda-campo">Al menos 8 caracteres, con letras y números.</div>
+      <label class="campo" for="r-confirmar">Repita la contraseña</label>
+      <input id="r-confirmar" type="password" autocomplete="new-password" required>
+      <label class="campo" for="r-codigo">Código de registro</label>
+      <input id="r-codigo" name="codigo" required>
+      <div class="ayuda-campo">Aparece en la ventana del servidor al iniciar el sistema. Solo lo tienen los administradores.</div>
+      <button class="btn" type="submit">Crear cuenta</button>
+      <div id="m-registro"></div>
+    </form>
+
+    <a class="volver" href="/">← Volver a la página principal</a>
+  </div>
+</main>
+<script src="js/ingresar.js"></script>
+</body>
+</html>

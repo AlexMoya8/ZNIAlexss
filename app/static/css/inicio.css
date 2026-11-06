@@ -1,0 +1,113 @@
+/* Página de presentación. Usa los colores definidos en estilos.css. */
+body.landing { background: var(--panel); }
+.ancho { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+.cabecera { position: sticky; top: 0; z-index: 20; background: color-mix(in srgb, var(--panel) 88%, transparent);
+  backdrop-filter: saturate(1.4) blur(10px); border-bottom: 1px solid var(--line); }
+.cabecera-fila { display: flex; align-items: center; gap: 20px; height: 64px; }
+.cabecera .marca { padding: 0; }
+.cabecera .marca b { font-size: 16px; }
+.menu { display: flex; gap: 4px; margin-left: 12px; }
+.menu a { color: var(--ink-2); text-decoration: none; font-size: 14px; padding: 6px 10px; border-radius: 8px; }
+.menu a:hover { color: var(--ink); background: var(--panel-2); }
+.cabecera-acciones { margin-left: auto; display: flex; gap: 8px; align-items: center; }
+.hamburguesa { display: none; background: none; border: 1px solid var(--line); border-radius: 8px; padding: 5px 10px; color: var(--ink); font: inherit; cursor: pointer; }
+
+.sobretitulo { text-transform: uppercase; letter-spacing: .08em; font-size: 12px; font-weight: 700; color: var(--acc); margin: 0 0 10px; }
+.heroe-l { padding: 72px 0 64px; background: radial-gradient(1200px 500px at 85% -10%, var(--acc-2), transparent 70%); }
+.heroe-rejilla { display: grid; grid-template-columns: 1.1fr .9fr; gap: 48px; align-items: center; }
+.heroe-l h1 { font-size: 44px; line-height: 1.1; letter-spacing: -.025em; margin: 0 0 18px; max-width: 18ch; }
+.bajada { font-size: 18px; color: var(--ink-2); margin: 0; max-width: 56ch; }
+.heroe-l .acciones { margin-top: 26px; }
+.heroe-l .btn { padding: 12px 20px; font-size: 15px; }
+.sellos { list-style: none; padding: 0; margin: 34px 0 0; display: flex; gap: 32px; flex-wrap: wrap; }
+.sellos b { display: block; font-size: 26px; letter-spacing: -.02em; }
+.sellos span { font-size: 13px; color: var(--ink-2); }
+
+.vista-previa { margin: 0; padding: 0; background: var(--panel); border: 1px solid var(--line); border-radius: 16px;
+  box-shadow: 0 20px 50px -20px rgba(16, 40, 80, .25); overflow: hidden; }
+.vp-cabeza { display: flex; align-items: center; gap: 6px; padding: 10px 14px; background: var(--panel-2); border-bottom: 1px solid var(--line); }
+.vp-punto { width: 9px; height: 9px; border-radius: 50%; background: var(--line); }
+.vp-titulo { margin-left: 8px; font-size: 13px; font-weight: 600; color: var(--ink-2); }
+.vp-cuerpo { padding: 18px; }
+.vp-sub { font-size: 13px; color: var(--ink-2); margin: 0 0 12px; }
+.vp-barras { display: grid; gap: 10px; }
+.vp-fila { display: grid; grid-template-columns: 110px 1fr 64px; align-items: center; gap: 10px; font-size: 13px; }
+.vp-fila .nombre { color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.vp-fila .valor { text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; }
+.vp-pista { position: relative; height: 12px; }
+.vp-barra { position: absolute; left: 0; top: 0; height: 12px; border-radius: 0 4px 4px 0; background: var(--serie); }
+.vp-int { position: absolute; top: 5px; height: 2px; background: var(--ink-2); }
+.vp-int::before, .vp-int::after { content: ""; position: absolute; top: -4px; width: 2px; height: 10px; background: var(--ink-2); }
+.vp-int::before { left: 0; } .vp-int::after { right: 0; }
+.vp-pie { display: flex; align-items: center; gap: 10px; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--line); font-size: 13px; color: var(--ink-2); flex-wrap: wrap; }
+
+.seccion { padding: 80px 0; }
+.seccion.alterna { background: var(--bg); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.seccion h2, .cierre h2 { font-size: 32px; line-height: 1.2; letter-spacing: -.02em; margin: 0 0 14px; max-width: 26ch; }
+.intro { font-size: 17px; color: var(--ink-2); max-width: 64ch; margin: 0 0 36px; }
+.cifras { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+.cifra { border-top: 3px solid var(--acc); padding-top: 14px; }
+.cifra b { display: block; font-size: 34px; letter-spacing: -.02em; margin-bottom: 6px; }
+.cifra span { color: var(--ink-2); font-size: 14px; }
+
+.flujo { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 14px; counter-reset: f; }
+.flujo li { position: relative; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 18px; }
+.flujo li:not(:last-child)::after { content: ""; position: absolute; right: -11px; top: 38px; width: 8px; height: 8px;
+  border-top: 2px solid var(--ink-3); border-right: 2px solid var(--ink-3); transform: rotate(45deg); }
+.flujo .icono { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 10px; background: var(--acc-2); color: var(--acc); margin-bottom: 12px; }
+.flujo .icono svg { width: 22px; height: 22px; }
+.flujo b { display: block; margin-bottom: 6px; }
+.flujo span:not(.icono) { font-size: 14px; color: var(--ink-2); }
+
+.rejilla-modelo { display: grid; grid-template-columns: 1.1fr .9fr; gap: 48px; align-items: start; }
+.lista-check { list-style: none; padding: 0; margin: 0; display: grid; gap: 12px; }
+.lista-check li { position: relative; padding-left: 28px; color: var(--ink-2); }
+.lista-check li b { color: var(--ink); }
+.lista-check li::before { content: ""; position: absolute; left: 0; top: 4px; width: 16px; height: 16px; border-radius: 50%;
+  background: var(--acc-2) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='m4.5 8.2 2.2 2.2 4.8-4.8' fill='none' stroke='%231f6fcf' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/16px no-repeat; }
+.tarjeta-metricas { background: var(--bg); border: 1px solid var(--line); border-radius: 16px; padding: 22px; }
+.metrica { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+.metrica span { color: var(--ink-2); font-size: 14px; }
+.metrica b { font-size: 22px; font-variant-numeric: tabular-nums; }
+.tarjeta-metricas .nota { margin: 14px 0 0; }
+
+.roles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+.rol { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 24px; display: flex; flex-direction: column; gap: 14px; }
+.rol h3 { margin: 0; font-size: 20px; }
+.rol.destacado { border-color: var(--acc); box-shadow: 0 0 0 3px var(--acc-2); }
+.rol .btn { align-self: flex-start; margin-top: auto; }
+.rol .nota { margin: 0; }
+
+.equipo { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin: 10px 0 18px; }
+.persona { display: flex; align-items: center; gap: 12px; padding: 16px; border: 1px solid var(--line); border-radius: 12px; }
+.persona b { display: block; }
+.persona span:not(.avatar) { font-size: 13px; color: var(--ink-2); }
+.persona .avatar { width: 40px; height: 40px; }
+.avatar.sec { background: var(--panel-2); color: var(--ink); }
+
+.cierre { padding: 72px 0; text-align: center; background: linear-gradient(180deg, var(--panel), var(--acc-2)); border-top: 1px solid var(--line); }
+.cierre h2 { margin: 0 auto 12px; }
+.cierre p { color: var(--ink-2); margin: 0 auto; max-width: 56ch; }
+.cierre .acciones { justify-content: center; margin-top: 22px; }
+.pie-l { padding: 24px 0; font-size: 13px; color: var(--ink-3); border-top: 1px solid var(--line); }
+
+@media (max-width: 1000px) {
+  .flujo { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .flujo li::after { display: none; }
+  .cifras { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 860px) {
+  .ancho { padding: 0 16px; }
+  .menu { display: none; position: absolute; top: 64px; left: 0; right: 0; flex-direction: column; background: var(--panel);
+    border-bottom: 1px solid var(--line); padding: 8px 16px 14px; margin: 0; }
+  .menu.abierto { display: flex; }
+  .hamburguesa { display: inline-block; }
+  .cabecera-acciones .btn:not(.sec) { display: none; }
+  .heroe-l { padding: 40px 0; }
+  .heroe-rejilla, .rejilla-modelo, .roles, .equipo { grid-template-columns: 1fr; gap: 28px; }
+  .heroe-l h1 { font-size: 32px; }
+  .bajada, .intro { font-size: 16px; }
+  .seccion { padding: 56px 0; }
+  .seccion h2, .cierre h2 { font-size: 26px; }
+  .flujo, .cifras { grid-template-columns: 1fr; }
+}

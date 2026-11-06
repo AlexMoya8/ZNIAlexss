@@ -1,0 +1,160 @@
+{
+  "proposito": "Comparación preliminar con validación temporal de origen móvil; no modifica modelos registrados.",
+  "periodo_maximo_objetivo": "2025-06",
+  "registros": 4708,
+  "localidades": 207,
+  "ventanas": [
+    {
+      "ventana": 1,
+      "desde": "2023-07",
+      "hasta": "2023-12",
+      "n_entrenamiento": 2897,
+      "n_prueba": 350,
+      "uso": "desarrollo"
+    },
+    {
+      "ventana": 2,
+      "desde": "2024-01",
+      "hasta": "2024-06",
+      "n_entrenamiento": 3247,
+      "n_prueba": 368,
+      "uso": "desarrollo"
+    },
+    {
+      "ventana": 3,
+      "desde": "2024-07",
+      "hasta": "2024-12",
+      "n_entrenamiento": 3615,
+      "n_prueba": 413,
+      "uso": "desarrollo"
+    },
+    {
+      "ventana": 4,
+      "desde": "2025-01",
+      "hasta": "2025-06",
+      "n_entrenamiento": 4028,
+      "n_prueba": 680,
+      "uso": "auditoria_temporal_reservada"
+    }
+  ],
+  "seleccion_preliminar_solo_desarrollo": [
+    {
+      "algoritmo": "HistGradientBoosting",
+      "mae_log_promedio": 0.2058190968111114,
+      "mae_log_desviacion": 0.014623539309832552,
+      "wape_promedio_pct": 9.555632505559347,
+      "mae_kwh_promedio": 34323.605207645705,
+      "sesgo_kwh_promedio": -20138.02007517536
+    },
+    {
+      "algoritmo": "RandomForest",
+      "mae_log_promedio": 0.2075870437095594,
+      "mae_log_desviacion": 0.015274202585292098,
+      "wape_promedio_pct": 9.245167896755845,
+      "mae_kwh_promedio": 32735.212286902068,
+      "sesgo_kwh_promedio": -20735.106720780557
+    },
+    {
+      "algoritmo": "ExtraTrees",
+      "mae_log_promedio": 0.21004506378454033,
+      "mae_log_desviacion": 0.02200612583887159,
+      "wape_promedio_pct": 8.486961550489527,
+      "mae_kwh_promedio": 30278.03237296706,
+      "sesgo_kwh_promedio": -22666.301447685782
+    },
+    {
+      "algoritmo": "Ridge",
+      "mae_log_promedio": 0.24463300980577737,
+      "mae_log_desviacion": 0.030760772449618824,
+      "wape_promedio_pct": 16.07849205872144,
+      "mae_kwh_promedio": 56137.38763747007,
+      "sesgo_kwh_promedio": -35481.99887125969
+    },
+    {
+      "algoritmo": "Ingenuo_lag1",
+      "mae_log_promedio": 0.2721407774365842,
+      "mae_log_desviacion": 0.06200102129580638,
+      "wape_promedio_pct": 5.421944831186969,
+      "mae_kwh_promedio": 19572.03599843843,
+      "sesgo_kwh_promedio": -3441.758838737411
+    }
+  ],
+  "auditoria_ventana_4_no_usar_para_seleccion": [
+    {
+      "algoritmo": "HistGradientBoosting",
+      "ventana": 4,
+      "desde": "2025-01",
+      "hasta": "2025-06",
+      "registros_entrenamiento": 4028,
+      "registros_prueba": 680,
+      "mae_log": 0.3003150794856773,
+      "wape_pct": 8.919737911911119,
+      "mae_kwh": 27976.73894067985,
+      "sesgo_kwh": -20315.994115561807,
+      "n": 680,
+      "tiempo_segundos": 0.6270456720000084
+    },
+    {
+      "algoritmo": "ExtraTrees",
+      "ventana": 4,
+      "desde": "2025-01",
+      "hasta": "2025-06",
+      "registros_entrenamiento": 4028,
+      "registros_prueba": 680,
+      "mae_log": 0.30639474322901866,
+      "wape_pct": 8.078743010391172,
+      "mae_kwh": 25338.96022536049,
+      "sesgo_kwh": -17310.17992439566,
+      "n": 680,
+      "tiempo_segundos": 0.7437967789999789
+    },
+    {
+      "algoritmo": "RandomForest",
+      "ventana": 4,
+      "desde": "2025-01",
+      "hasta": "2025-06",
+      "registros_entrenamiento": 4028,
+      "registros_prueba": 680,
+      "mae_log": 0.30754802260722075,
+      "wape_pct": 6.4398488575388875,
+      "mae_kwh": 20198.57220964007,
+      "sesgo_kwh": -7566.734058669356,
+      "n": 680,
+      "tiempo_segundos": 1.1538881280000055
+    },
+    {
+      "algoritmo": "Ridge",
+      "ventana": 4,
+      "desde": "2025-01",
+      "hasta": "2025-06",
+      "registros_entrenamiento": 4028,
+      "registros_prueba": 680,
+      "mae_log": 0.33330894910613507,
+      "wape_pct": 17.22742201901399,
+      "mae_kwh": 54033.77242769336,
+      "sesgo_kwh": -37453.53155043253,
+      "n": 680,
+      "tiempo_segundos": 0.016932018999966658
+    },
+    {
+      "algoritmo": "Ingenuo_lag1",
+      "ventana": 4,
+      "desde": "2025-01",
+      "hasta": "2025-06",
+      "registros_entrenamiento": 4028,
+      "registros_prueba": 680,
+      "mae_log": 0.42480580393117445,
+      "wape_pct": 7.917865305513214,
+      "mae_kwh": 24834.367647058825,
+      "sesgo_kwh": 1984.1323529411766,
+      "n": 680,
+      "tiempo_segundos": 0.0
+    }
+  ],
+  "advertencias": [
+    "Los objetivos iguales a cero se excluyen porque la fuente no permite distinguir de forma fiable cero real, interrupción y ausencia de reporte.",
+    "La selección se basa principalmente en MAE log; WAPE y MAE en kWh se reportan como métricas complementarias.",
+    "La última ventana se reserva como auditoría temporal y no debe usarse para ajustar hiperparámetros.",
+    "Este experimento compara configuraciones iniciales; después se debe optimizar hiperparámetros solo dentro del periodo de desarrollo."
+  ]
+}

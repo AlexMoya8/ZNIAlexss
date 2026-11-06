@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+.venv/
+datos/procesos/
+.pytest_cache/
+datos/seguridad/
