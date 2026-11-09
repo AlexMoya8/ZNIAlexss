@@ -24,8 +24,8 @@ log = logging.getLogger("zni")
 
 @asynccontextmanager
 async def al_iniciar(_app):
-    print(f"\n  Sistema ZNI listo en http://127.0.0.1:8000\n  Código para registrar administradores: "
-          f"{seguridad.codigo_registro()}\n", flush=True)
+    print("\n  Sistema ZNI listo. Registro público deshabilitado; administradores por variables de entorno.\n",
+          flush=True)
     yield
 
 

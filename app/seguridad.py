@@ -1,146 +1,74 @@
-"""Cuentas de administrador, sesiones, historial de inicios de sesión y control de acceso.
+"""Autenticación de los tres administradores de ZNI-APP sin base de datos.
 
-Solo los administradores pueden reentrenar el modelo, decidir qué versión queda activa y administrar las
-cuentas. El mapa y el análisis exploratorio de documentos son públicos. La validación, las predicciones y las herramientas del modelo requieren una sesión administrativa.
+Las credenciales se leen exclusivamente desde variables de entorno:
+  ZNI_ADMIN_ALEXM_PASSWORD
+  ZNI_ADMIN_ALEXC_PASSWORD
+  ZNI_ADMIN_CARLOSS_PASSWORD
+  ZNI_SECRET_KEY
 
-- Base de datos: SQLite en datos/seguridad/zni.db (viene con Python, no hay que instalar nada).
-  Tablas «usuarios» e «inicios_sesion». Si existe un usuarios.json de la versión anterior, se importa solo.
-- Contraseñas: PBKDF2-HMAC-SHA256 con sal aleatoria.
-- Sesión: token firmado con HMAC en una cookie HttpOnly y SameSite=Lax, válido 8 horas. La firma incluye
-  parte del hash de la contraseña, así que cambiar la contraseña o desactivar la cuenta cierra sus sesiones.
-- Registro público: exige un código que se genera la primera vez y se muestra en la consola (o se fija con
-  la variable de entorno ZNI_CODIGO_REGISTRO). Un administrador con sesión puede crear cuentas sin código.
-- Fuerza bruta: tras 5 intentos fallidos en 10 minutos desde una misma dirección, se bloquea temporalmente.
+No existe registro público ni CRUD de cuentas. Las sesiones se firman con HMAC y
+se validan contra las credenciales actuales del entorno.
 """
 import base64
 import hashlib
 import hmac
-import json
 import os
 import re
 import secrets
-import sqlite3
 import threading
 import time
-from contextlib import contextmanager
 from datetime import datetime
 
 from fastapi import HTTPException, Request
-
-from .config import DIR_SEGURIDAD
 
 COOKIE = "zni_sesion"
 DURACION_SESION = 8 * 3600
 ITERACIONES = 200_000
 MAX_FALLOS, VENTANA_FALLOS = 5, 600
-PATRON_USUARIO = re.compile(r"^[a-zA-Z0-9_.-]{3,30}$")
 EVENTOS = ("registro", "ingreso", "fallo", "bloqueo", "salida")
 
+_ADMINISTRADORES = {
+    "alexm": {"nombre": "Alex M", "variable": "ZNI_ADMIN_ALEXM_PASSWORD"},
+    "alexc": {"nombre": "Alex C", "variable": "ZNI_ADMIN_ALEXC_PASSWORD"},
+    "carloss": {"nombre": "Carlos S", "variable": "ZNI_ADMIN_CARLOSS_PASSWORD"},
+}
 _candado = threading.Lock()
 _fallos: dict[str, list[float]] = {}
-
-ESQUEMA = """
-CREATE TABLE IF NOT EXISTS usuarios (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    usuario TEXT NOT NULL UNIQUE,
-    nombre TEXT NOT NULL,
-    rol TEXT NOT NULL DEFAULT 'administrador',
-    sal TEXT NOT NULL,
-    hash TEXT NOT NULL,
-    activo INTEGER NOT NULL DEFAULT 1,
-    creado TEXT NOT NULL,
-    creado_por TEXT,
-    actualizado TEXT,
-    ultimo_ingreso TEXT
-);
-CREATE TABLE IF NOT EXISTS inicios_sesion (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    fecha TEXT NOT NULL,
-    usuario TEXT NOT NULL,
-    evento TEXT NOT NULL,
-    ip TEXT,
-    navegador TEXT,
-    detalle TEXT
-);
-CREATE INDEX IF NOT EXISTS ix_inicios_fecha ON inicios_sesion(fecha);
-"""
-
-
-def _archivo(nombre):
-    DIR_SEGURIDAD.mkdir(parents=True, exist_ok=True)
-    return DIR_SEGURIDAD / nombre
+_eventos: list[dict] = []
 
 
 def _ahora():
     return datetime.now().isoformat(timespec="seconds")
 
 
-@contextmanager
-def _bd():
-    """Conexión a la base de datos; confirma los cambios al salir sin errores."""
-    con = sqlite3.connect(_archivo("zni.db"), timeout=10)
-    con.row_factory = sqlite3.Row
-    try:
-        con.executescript(ESQUEMA)
-        _importar_json(con)
-        yield con
-        con.commit()
-    finally:
-        con.close()
-
-
-def _importar_json(con):
-    """Pasa a la base de datos las cuentas guardadas en usuarios.json por la versión anterior."""
-    ruta = DIR_SEGURIDAD / "usuarios.json"
-    if not ruta.exists():
-        return
-    for u in json.loads(ruta.read_text(encoding="utf-8")).get("usuarios", []):
-        con.execute("INSERT OR IGNORE INTO usuarios (usuario, nombre, rol, sal, hash, activo, creado) VALUES (?,?,?,?,?,?,?)",
-                    (u["usuario"], u["nombre"], u.get("rol", "administrador"), u["sal"], u["hash"],
-                     int(u.get("activo", True)), u.get("creado", _ahora())))
-    con.commit()
-    ruta.rename(ruta.with_suffix(".json.importado"))
-
-
 def _secreto() -> bytes:
-    ruta = _archivo("secreto.key")
-    if not ruta.exists():
-        ruta.write_text(secrets.token_hex(32), encoding="utf-8")
-    return bytes.fromhex(ruta.read_text(encoding="utf-8").strip())
+    valor = os.environ.get("ZNI_SECRET_KEY", "").strip()
+    if len(valor) < 32:
+        raise HTTPException(503, "El administrador del sistema debe configurar ZNI_SECRET_KEY en el servidor.")
+    return valor.encode("utf-8")
 
 
-def codigo_registro() -> str:
-    if os.environ.get("ZNI_CODIGO_REGISTRO"):
-        return os.environ["ZNI_CODIGO_REGISTRO"]
-    ruta = _archivo("codigo_registro.txt")
-    if not ruta.exists():
-        ruta.write_text("ZNI-" + secrets.token_hex(3).upper(), encoding="utf-8")
-    return ruta.read_text(encoding="utf-8").strip()
+def _password(usuario: str) -> str | None:
+    cuenta = _ADMINISTRADORES.get(usuario.lower())
+    if not cuenta:
+        return None
+    valor = os.environ.get(cuenta["variable"], "")
+    return valor if valor else None
 
 
-def _hash(contrasena: str, sal: bytes) -> str:
-    return hashlib.pbkdf2_hmac("sha256", contrasena.encode(), sal, ITERACIONES).hex()
-
-
-def _validar_usuario(usuario):
-    if not PATRON_USUARIO.match(usuario):
-        raise HTTPException(400, "El usuario debe tener de 3 a 30 caracteres: letras, números, punto, guion o guion bajo.")
+def _hash(contrasena: str, usuario: str) -> str:
+    sal = hashlib.sha256(("ZNI-APP:" + usuario.lower()).encode()).digest()[:16]
+    return hashlib.pbkdf2_hmac("sha256", contrasena.encode("utf-8"), sal, ITERACIONES).hex()
 
 
 def _validar_contrasena(contrasena):
-    if len(contrasena) < 8 or not re.search(r"[A-Za-z]", contrasena) or not re.search(r"\d", contrasena):
-        raise HTTPException(400, "La contraseña debe tener al menos 8 caracteres, con letras y números.")
+    if len(contrasena) < 10:
+        raise HTTPException(400, "La contraseña debe tener al menos 10 caracteres.")
 
 
-def anotar(usuario, evento, ip="", navegador="", detalle=""):
-    """Guarda un evento en el historial de inicios de sesión."""
-    with _bd() as con:
-        con.execute("INSERT INTO inicios_sesion (fecha, usuario, evento, ip, navegador, detalle) VALUES (?,?,?,?,?,?)",
-                    (_ahora(), (usuario or "")[:60], evento, ip, (navegador or "")[:200], detalle))
-
-
-def _buscar(con, usuario):
-    return con.execute("SELECT * FROM usuarios WHERE usuario = ?", (usuario,)).fetchone()
+def _datos_usuario(usuario):
+    cuenta = _ADMINISTRADORES[usuario.lower()]
+    return {"usuario": usuario.lower(), "nombre": cuenta["nombre"], "rol": "administrador"}
 
 
 def publico(u):
@@ -148,112 +76,59 @@ def publico(u):
 
 
 def ficha(u):
-    """Datos de una cuenta para la pantalla de administración (nunca la sal ni el hash)."""
-    return {"usuario": u["usuario"], "nombre": u["nombre"], "rol": u["rol"], "activo": bool(u["activo"]),
-            "creado": u["creado"], "creado_por": u["creado_por"], "actualizado": u["actualizado"],
-            "ultimo_ingreso": u["ultimo_ingreso"]}
+    return {"usuario": u["usuario"], "nombre": u["nombre"], "rol": u["rol"],
+            "activo": True, "creado": "Configurado en Render", "creado_por": "Sistema",
+            "actualizado": None, "ultimo_ingreso": None}
+
+
+def anotar(usuario, evento, ip="", navegador="", detalle=""):
+    """Mantiene un historial temporal en memoria (se reinicia al reiniciar el servidor)."""
+    fila = {"id": len(_eventos) + 1, "fecha": _ahora(), "usuario": (usuario or "")[:60],
+            "evento": evento, "ip": (ip or "")[:100], "navegador": (navegador or "")[:200],
+            "detalle": detalle}
+    with _candado:
+        _eventos.append(fila)
+        del _eventos[:-500]
 
 
 def hay_administradores() -> bool:
-    with _bd() as con:
-        return con.execute("SELECT COUNT(*) FROM usuarios").fetchone()[0] > 0
+    return all(_password(u) for u in _ADMINISTRADORES)
 
 
-# ---------------------------------------------------------------- crear (registro público o por un administrador)
-
-def crear_usuario(usuario: str, nombre: str, contrasena: str, creado_por: str | None = None) -> dict:
-    usuario = usuario.strip().lower()
-    _validar_usuario(usuario)
-    _validar_contrasena(contrasena)
-    sal = secrets.token_bytes(16)
-    with _candado, _bd() as con:
-        if _buscar(con, usuario):
-            raise HTTPException(409, "Ese usuario ya existe.")
-        con.execute("INSERT INTO usuarios (usuario, nombre, rol, sal, hash, activo, creado, creado_por) "
-                    "VALUES (?,?,?,?,?,1,?,?)",
-                    (usuario, nombre.strip()[:80] or usuario, "administrador", sal.hex(), _hash(contrasena, sal),
-                     _ahora(), creado_por))
-        return ficha(_buscar(con, usuario))
+def codigo_registro() -> str:
+    # Se conserva por compatibilidad con el arranque existente; el registro está deshabilitado.
+    return "DESHABILITADO: cuentas definidas en variables de entorno"
 
 
 def registrar(usuario: str, nombre: str, contrasena: str, codigo: str, ip="", navegador="") -> dict:
-    if not hmac.compare_digest(codigo.strip().upper(), codigo_registro().upper()):
-        anotar(usuario.strip().lower(), "fallo", ip, navegador, "Código de registro inválido")
-        raise HTTPException(403, "El código de registro no es válido. Pídalo a un administrador del proyecto.")
-    u = crear_usuario(usuario, nombre, contrasena)
-    anotar(u["usuario"], "registro", ip, navegador, "Cuenta creada con el código de registro")
-    with _bd() as con:
-        con.execute("UPDATE usuarios SET ultimo_ingreso = ? WHERE usuario = ?", (_ahora(), u["usuario"]))
-    return publico(u)
+    raise HTTPException(403, "El registro está deshabilitado. Solo existen los tres administradores configurados.")
 
 
-# ---------------------------------------------------------------- leer
+def crear_usuario(usuario: str, nombre: str, contrasena: str, creado_por: str | None = None) -> dict:
+    raise HTTPException(403, "Las cuentas se administran mediante variables de entorno del servidor.")
+
 
 def listar_usuarios() -> list[dict]:
-    with _bd() as con:
-        return [ficha(u) for u in con.execute("SELECT * FROM usuarios ORDER BY creado")]
+    return [ficha(_datos_usuario(u)) for u in _ADMINISTRADORES]
 
 
 def historial(usuario: str = "", evento: str = "", limite: int = 100) -> dict:
-    sql, args = "SELECT * FROM inicios_sesion WHERE 1=1", []
+    with _candado:
+        filas = list(reversed(_eventos))
     if usuario:
-        sql += " AND usuario = ?"
-        args.append(usuario.strip().lower())
+        filas = [f for f in filas if f["usuario"] == usuario.lower()]
     if evento:
-        sql += " AND evento = ?"
-        args.append(evento)
-    with _bd() as con:
-        total = con.execute(sql.replace("SELECT *", "SELECT COUNT(*)"), args).fetchone()[0]
-        filas = con.execute(sql + " ORDER BY id DESC LIMIT ?", args + [max(1, min(int(limite), 500))]).fetchall()
-    return {"total": total, "eventos": [dict(f) for f in filas]}
+        filas = [f for f in filas if f["evento"] == evento]
+    return {"total": len(filas), "eventos": filas[:max(1, min(int(limite), 500))]}
 
 
-# ---------------------------------------------------------------- actualizar y eliminar
-
-def _activos(con, sin=None):
-    return con.execute("SELECT COUNT(*) FROM usuarios WHERE activo = 1 AND usuario != ?", (sin or "",)).fetchone()[0]
-
-
-def actualizar_usuario(usuario: str, quien: str, nombre: str | None = None, contrasena: str | None = None,
-                       activo: bool | None = None) -> dict:
-    usuario = usuario.strip().lower()
-    with _candado, _bd() as con:
-        u = _buscar(con, usuario)
-        if not u:
-            raise HTTPException(404, "Esa cuenta no existe.")
-        cambios, args = [], []
-        if nombre is not None and nombre.strip():
-            cambios.append("nombre = ?"); args.append(nombre.strip()[:80])
-        if contrasena:
-            _validar_contrasena(contrasena)
-            sal = secrets.token_bytes(16)
-            cambios += ["sal = ?", "hash = ?"]; args += [sal.hex(), _hash(contrasena, sal)]
-        if activo is not None and bool(activo) != bool(u["activo"]):
-            if not activo and usuario == quien:
-                raise HTTPException(400, "No puede desactivar su propia cuenta.")
-            if not activo and _activos(con, usuario) == 0:
-                raise HTTPException(400, "Debe quedar al menos un administrador activo.")
-            cambios.append("activo = ?"); args.append(int(bool(activo)))
-        if not cambios:
-            raise HTTPException(400, "No hay cambios para guardar.")
-        cambios.append("actualizado = ?"); args.append(_ahora())
-        con.execute(f"UPDATE usuarios SET {', '.join(cambios)} WHERE usuario = ?", args + [usuario])
-        return ficha(_buscar(con, usuario))
+def actualizar_usuario(usuario: str, quien: str, nombre=None, contrasena=None, activo=None) -> dict:
+    raise HTTPException(403, "No se pueden modificar cuentas desde el panel. Cambie las variables de entorno en Render.")
 
 
 def eliminar_usuario(usuario: str, quien: str):
-    usuario = usuario.strip().lower()
-    with _candado, _bd() as con:
-        if not _buscar(con, usuario):
-            raise HTTPException(404, "Esa cuenta no existe.")
-        if usuario == quien:
-            raise HTTPException(400, "No puede eliminar su propia cuenta.")
-        if _activos(con, usuario) == 0:
-            raise HTTPException(400, "Debe quedar al menos un administrador activo.")
-        con.execute("DELETE FROM usuarios WHERE usuario = ?", (usuario,))
+    raise HTTPException(403, "No se pueden eliminar las cuentas fijas de administración.")
 
-
-# ---------------------------------------------------------------- ingreso y sesión
 
 def _registrar_fallo(ip):
     ahora = time.time()
@@ -270,25 +145,20 @@ def _bloqueado(ip):
 
 
 def autenticar(usuario: str, contrasena: str, ip: str, navegador: str = "") -> dict:
-    usuario = usuario.strip().lower()
+    usuario = (usuario or "").strip().lower()
     if _bloqueado(ip):
         anotar(usuario, "bloqueo", ip, navegador, "Demasiados intentos fallidos")
         raise HTTPException(429, "Demasiados intentos fallidos. Espere 10 minutos e intente de nuevo.")
-    with _bd() as con:
-        u = _buscar(con, usuario)
-    u = u if u and u["activo"] else None
-    esperado = u["hash"] if u else _hash("x", b"0" * 16)  # mismo costo exista o no el usuario
-    calculado = _hash(contrasena, bytes.fromhex(u["sal"])) if u else _hash(contrasena, b"1" * 16)
-    if not u or not hmac.compare_digest(esperado, calculado):
+    esperado = _password(usuario)
+    correcto = bool(esperado) and hmac.compare_digest(_hash(contrasena, usuario), _hash(esperado, usuario))
+    if not correcto:
         _registrar_fallo(ip)
         anotar(usuario, "fallo", ip, navegador, "Usuario o contraseña incorrectos")
         raise HTTPException(401, "Usuario o contraseña incorrectos.")
     with _candado:
         _fallos.pop(ip, None)
-    with _bd() as con:
-        con.execute("UPDATE usuarios SET ultimo_ingreso = ? WHERE usuario = ?", (_ahora(), usuario))
     anotar(usuario, "ingreso", ip, navegador)
-    return publico(u)
+    return _datos_usuario(usuario)
 
 
 def _firma(usuario, vence, sello):
@@ -296,10 +166,13 @@ def _firma(usuario, vence, sello):
 
 
 def crear_token(usuario: str) -> str:
-    with _bd() as con:
-        u = _buscar(con, usuario)
+    usuario = usuario.lower()
+    contrasena = _password(usuario)
+    if not contrasena:
+        raise HTTPException(401, "La cuenta administrativa no está configurada.")
     vence = int(time.time()) + DURACION_SESION
-    firma = _firma(usuario, vence, u["hash"][:16])
+    sello = _hash(contrasena, usuario)[:16]
+    firma = _firma(usuario, vence, sello)
     return base64.urlsafe_b64encode(f"{usuario}|{vence}|{firma}".encode()).decode()
 
 
@@ -311,13 +184,19 @@ def usuario_de_token(token: str | None):
         vence = int(vence)
     except Exception:
         return None
-    if vence < time.time():
+    if vence < time.time() or usuario not in _ADMINISTRADORES:
         return None
-    with _bd() as con:
-        u = _buscar(con, usuario)
-    if not u or not u["activo"] or not hmac.compare_digest(firma, _firma(usuario, vence, u["hash"][:16])):
+    contrasena = _password(usuario)
+    if not contrasena:
         return None
-    return publico(u)
+    sello = _hash(contrasena, usuario)[:16]
+    try:
+        firma_esperada = _firma(usuario, vence, sello)
+    except HTTPException:
+        return None
+    if not hmac.compare_digest(firma, firma_esperada):
+        return None
+    return _datos_usuario(usuario)
 
 
 def usuario_actual(request: Request):
@@ -325,10 +204,7 @@ def usuario_actual(request: Request):
 
 
 def requiere_admin(request: Request) -> dict:
-    """Dependencia de FastAPI para las operaciones que solo pueden hacer los administradores."""
     u = usuario_actual(request)
     if u is None:
         raise HTTPException(401, "Debe ingresar como administrador para hacer esta operación.")
-    if u["rol"] != "administrador":
-        raise HTTPException(403, "Su cuenta no tiene permiso para hacer esta operación.")
     return u
