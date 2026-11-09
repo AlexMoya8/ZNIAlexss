@@ -119,10 +119,11 @@ async def analizar_dataset(archivo: UploadFile = File(...)):
 
 
 @app.post("/api/validar", tags=["Validación"], summary="Validar compatibilidad con el modelo activo")
-async def validar_compatibilidad(archivo: UploadFile = File(...), modo: str = Form("prediccion"),
-                               admin: dict = Depends(seguridad.requiere_admin)):
-    if modo not in ("prediccion", "actualizacion"):
-        raise HTTPException(400, "modo debe ser 'prediccion' o 'actualizacion'.")
+async def validar_compatibilidad(archivo: UploadFile = File(...), modo: str = Form("prediccion")):
+    # La validación para predicción es pública. La validación de datos para
+    # reentrenamiento nunca se expone desde este endpoint.
+    if modo != "prediccion":
+        raise HTTPException(403, "La validación para actualización está reservada a administradores.")
     _, meta = _activa()
     df, nombre = await _leer(archivo)
     pid, carpeta = _nuevo_proceso("validacion", nombre)
@@ -131,7 +132,7 @@ async def validar_compatibilidad(archivo: UploadFile = File(...), modo: str = Fo
 
 
 @app.post("/api/predecir", tags=["Predicción"], summary="Generar predicciones (solo con datos compatibles)")
-async def generar_predicciones(archivo: UploadFile = File(...), admin: dict = Depends(seguridad.requiere_admin)):
+async def generar_predicciones(archivo: UploadFile = File(...)):
     v, meta = _activa()
     df, nombre = await _leer(archivo)
     pid, carpeta = _nuevo_proceso("prediccion", nombre)

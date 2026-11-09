@@ -4,3 +4,6 @@ __pycache__/
 datos/procesos/
 .pytest_cache/
 datos/seguridad/
+.env
+.env.*
+!.env.render.example
