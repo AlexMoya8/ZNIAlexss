@@ -1,31 +1,841 @@
 <!doctype html>
 <html lang="es">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="description" content="ZNI-APP: análisis y predicción de demanda energética en las Zonas No Interconectadas de Colombia.">
-<title>ZNI-APP | Inteligencia energética</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/portal.css">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <meta name="description" content="ZNI-APP: análisis y predicción de demanda energética en las Zonas No Interconectadas de Colombia.">
+
+    <title>ZNI-APP | Inteligencia energética</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Estilos generales -->
+    <link rel="stylesheet" href="/css/portal.css">
+
+    <!-- Estilos del mapa integrado -->
+    <link rel="stylesheet" href="/css/mapa-portal.css">
+    <link rel="stylesheet" href="/css/mapa.css">
+
+    <!-- Ocultar registros y tarjetas de resumen -->
+    <style>
+        .panel-registros-integrado {
+            display: none !important;
+        }
+
+        #territory-stats {
+            display: none !important;
+        }
+    </style>
 </head>
+
 <body>
-<header class="topbar"><a class="brand" href="#inicio"><span class="brand-mark">ϟ</span><span><b>ZNI-APP</b><small>Inteligencia energética para Zonas No Interconectadas</small></span></a>
-<button class="menu-toggle" id="menu-toggle" aria-label="Abrir menú">☰</button><nav id="nav"><a href="#inicio">Inicio</a><a href="#explorador">Explorador</a><a href="#instrucciones">Cómo funciona</a><a href="#proyecto">Sobre el proyecto</a></nav><a class="admin-link" href="/ingresar.html">♙ <span>Ingresar Sección</span></a></header>
-<main id="inicio">
-<section class="hero"><div class="hero-shade"></div><div class="wrap hero-content"><p class="eyebrow">BIENVENIDO A ZNI-APP</p><h1>¿Cómo será la demanda de energía <em>en tu territorio?</em></h1><p class="hero-copy">Consulta datos históricos, explora las Zonas No Interconectadas y genera predicciones energéticas con modelos de aprendizaje automático.</p><div class="hero-actions"><a class="btn primary" href="#explorador">▥ &nbsp;Explorar y predecir</a><a class="btn ghost" href="#instrucciones">⌄ &nbsp;Cómo funciona</a></div><div class="hero-note"><span class="pulse"></span> Plataforma de análisis energético para Colombia</div></div><div class="hero-wave"></div></section>
-<section class="benefits"><div class="wrap benefit-grid"><article><span>ϟ</span><div><b>Datos históricos</b><small>Registros reales de consumo energético.</small></div></article><article><span>▥</span><div><b>Análisis exploratorio</b><small>Comprende el comportamiento de la demanda.</small></div></article><article><span>⌁</span><div><b>Predicciones</b><small>Estima la demanda futura con modelos de IA.</small></div></article><article><span>◇</span><div><b>Apoyo a la planificación</b><small>Información para la gestión energética en ZNI.</small></div></article></div></section>
-<section class="explorer-section" id="explorador"><div class="wrap"><p class="eyebrow green">EXPLORADOR Y MODELO PREDICTIVO</p><h2>Elige un territorio, analiza sus datos y <em>predice su demanda energética</em></h2><p class="section-lead">Consulta la información histórica y ejecuta el modelo predictivo desde un mismo lugar.</p>
-<div class="workspace"><div class="map-card"><div class="map-head"><b>Explorador territorial</b><span id="source-status">Conectando con los datos…</span></div><div class="map-visual"><div class="map-symbol">CO</div><div class="map-caption"><b>Colombia · Zonas No Interconectadas</b><small>Selecciona un territorio en los filtros para consultar sus registros.</small></div></div><div class="territory-stats" id="territory-stats"><div><b>—</b><small>Registros</small></div><div><b>—</b><small>Localidades</small></div><div><b>—</b><small>Energía (MWh)</small></div></div></div>
-<div class="analysis-card"><div class="filters"><label>Departamento<select id="departamento"><option value="">Cargando…</option></select></label><label>Municipio<select id="municipio" disabled><option value="">Todos</option></select></label><label>Localidad<select id="localidad" disabled><option value="">Todas</option></select></label></div>
-<div class="tabs"><button class="tab active" data-tab="prediccion">▥ Modelo predictivo</button><button class="tab" data-tab="historico">▤ Datos históricos</button><button class="tab" data-tab="ayuda">ⓘ Instrucciones</button></div>
-<div class="prediction-layout" id="tab-prediccion"><div class="model-config"><h3>⚙ Configura la predicción</h3><p>Carga tus registros energéticos. ZNI-APP comprobará automáticamente si cumplen los requisitos del modelo.</p><label class="file-drop" for="prediction-file"><span class="upload-icon">↑</span><b id="file-name">Selecciona tu archivo CSV o Excel</b><small>Formato .csv, .xlsx o .xls · Máximo 20 MB</small><input id="prediction-file" type="file" accept=".csv,.xlsx,.xls"></label><button class="btn validate-btn" id="validate-file" type="button">✓ &nbsp;Validar documento</button><div id="validation-results" class="validation-results" aria-live="polite"><b>Tu documento aún no ha sido validado</b><span>Selecciona un archivo y pulsa «Validar documento» para revisar su estructura y compatibilidad.</span></div><label>Horizonte disponible<select id="horizon" disabled><option>Mes siguiente al último periodo del archivo</option></select></label><button class="btn run-btn" id="run-prediction" disabled>▶ &nbsp;Ejecutar predicción</button><p class="fineprint">El archivo debe cumplir el esquema de variables del modelo activo. El sistema valida su compatibilidad antes de predecir.</p></div><div class="chart-panel"><div class="chart-title"><div><h3>Resultados de la predicción</h3><small id="chart-subtitle">Los resultados aparecerán después de ejecutar el modelo.</small></div><span class="legend"><i></i> Predicción</span></div><div id="prediction-results" class="empty-chart"><div class="empty-icon">⌁</div><b>Tu análisis aparecerá aquí</b><span>Selecciona un archivo preparado y ejecuta la predicción.</span></div></div></div>
-<div class="history-panel" id="tab-historico" hidden><div class="history-heading"><div><h3>Comportamiento histórico</h3><p id="history-label">Selecciona un departamento para consultar sus datos.</p></div><span class="data-pill">Datos oficiales disponibles</span></div><div id="history-results" class="history-empty">Los indicadores históricos se cargarán según el territorio seleccionado.</div></div>
-<div class="help-panel" id="tab-ayuda" hidden><h3>Antes de generar una predicción</h3><ol><li>Selecciona el departamento, municipio y localidad que deseas estudiar.</li><li>Prepara un archivo con las variables del esquema del modelo.</li><li>Carga el archivo CSV o Excel en el módulo predictivo.</li><li>Ejecuta la predicción y revisa la validación, resultados e intervalos de confianza.</li><li>Descarga los resultados en CSV, Excel o reporte HTML.</li></ol><a href="/docs" target="_blank" rel="noopener">Consultar documentación técnica de la API ↗</a></div>
-</div></div>
-<div class="disclaimer">La selección territorial permite consultar los registros históricos. La predicción se calcula con el archivo compatible que se carga en el modelo; no se inventan resultados cuando faltan variables.</div>
-</div></section>
-<section class="steps-section" id="instrucciones"><div class="wrap steps-wrap"><div class="steps-art"><div class="screen-art"><span>ϟ</span><div class="bars"><i></i><i></i><i></i><i></i><i></i></div></div></div><div class="steps-content"><p class="eyebrow green">INSTRUCCIONES DE USO</p><h2>¿Cómo usar ZNI-APP?</h2><div class="steps-grid"><article><b>1</b><h3>Selecciona el territorio</h3><p>Elige departamento, municipio y localidad.</p></article><article><b>2</b><h3>Consulta los datos</h3><p>Revisa los registros históricos disponibles.</p></article><article><b>3</b><h3>Ejecuta la predicción</h3><p>Carga un archivo compatible y ejecuta el modelo.</p></article><article><b>4</b><h3>Analiza resultados</h3><p>Visualiza las estimaciones y descarga los reportes.</p></article></div></div></div></section>
-<section class="about-section" id="proyecto"><div class="wrap"><p class="eyebrow">SOBRE EL PROYECTO</p><h2>Inteligencia de datos para la gestión energética en las <em>ZNI</em></h2><p>ZNI-APP es una plataforma académica y tecnológica que integra análisis exploratorio, validación de datos y modelos predictivos para apoyar la comprensión y planificación de la demanda energética en las Zonas No Interconectadas de Colombia.</p></div></section>
-</main><footer><div class="wrap footer-row"><b>ZNI-APP</b><span>Plataforma de inteligencia energética · Colombia</span><a href="/ingresar.html">Administración</a></div></footer>
-<div class="toast" id="toast" role="status"></div><script src="js/portal.js"></script>
-</body></html>
+
+    <!-- NAVBAR -->
+    <header class="topbar">
+
+        <a class="brand" href="#inicio">
+            <span class="brand-mark">ϟ</span>
+
+            <span>
+                <b>ZNI-APP</b>
+                <small>Inteligencia energética para Zonas No Interconectadas</small>
+            </span>
+        </a>
+
+        <button class="menu-toggle" id="menu-toggle" aria-label="Abrir menú">
+            ☰
+        </button>
+
+        <nav id="nav">
+            <a href="#inicio">Inicio</a>
+            <a href="#explorador">Explorador</a>
+            <a href="#instrucciones">Cómo funciona</a>
+            <a href="#proyecto">Sobre el proyecto</a>
+        </nav>
+
+        <a class="admin-link" href="/ingresar.html">
+            ♙ <span>Ingresar Sección</span>
+        </a>
+
+    </header>
+
+
+    <main id="inicio">
+
+        <!-- HERO -->
+        <section class="hero">
+
+            <div class="hero-shade"></div>
+
+            <div class="wrap hero-content">
+
+                <p class="eyebrow">BIENVENIDO A ZNI-APP</p>
+
+                <h1>
+                    ¿Cómo será la demanda de energía
+                    <em>en tu territorio?</em>
+                </h1>
+
+                <p class="hero-copy">
+                    Consulta datos históricos, explora las Zonas No Interconectadas
+                    y genera predicciones energéticas con modelos de aprendizaje automático.
+                </p>
+
+                <div class="hero-actions">
+                    <a class="btn primary" href="#explorador">
+                        ▥ &nbsp;Explorar y predecir
+                    </a>
+
+                    <a class="btn ghost" href="#instrucciones">
+                        ⌄ &nbsp;Cómo funciona
+                    </a>
+                </div>
+
+                <div class="hero-note">
+                    <span class="pulse"></span>
+                    Plataforma de análisis energético para Colombia
+                </div>
+
+            </div>
+
+            <div class="hero-wave"></div>
+
+        </section>
+
+
+        <!-- BENEFICIOS -->
+        <section class="benefits">
+
+            <div class="wrap benefit-grid">
+
+                <article>
+                    <span>ϟ</span>
+                    <div>
+                        <b>Datos históricos</b>
+                        <small>Registros reales de consumo energético.</small>
+                    </div>
+                </article>
+
+                <article>
+                    <span>▥</span>
+                    <div>
+                        <b>Análisis exploratorio</b>
+                        <small>Comprende el comportamiento de la demanda.</small>
+                    </div>
+                </article>
+
+                <article>
+                    <span>⌁</span>
+                    <div>
+                        <b>Predicciones</b>
+                        <small>Estima la demanda futura con modelos de IA.</small>
+                    </div>
+                </article>
+
+                <article>
+                    <span>◇</span>
+                    <div>
+                        <b>Apoyo a la planificación</b>
+                        <small>Información para la gestión energética en ZNI.</small>
+                    </div>
+                </article>
+
+            </div>
+
+        </section>
+
+
+        <!-- EXPLORADOR Y MODELO PREDICTIVO -->
+        <section class="explorer-section" id="explorador">
+
+            <div class="wrap">
+
+                <p class="eyebrow green">
+                    EXPLORADOR Y MODELO PREDICTIVO
+                </p>
+
+                <h2>
+                    Elige un territorio, analiza sus datos y
+                    <em>predice su demanda energética</em>
+                </h2>
+
+                <p class="section-lead">
+                    Consulta la información histórica y ejecuta el modelo predictivo
+                    desde un mismo lugar.
+                </p>
+
+
+                <div class="workspace">
+
+                    <!-- TARJETA DEL MAPA -->
+                    <div class="map-card">
+
+                        <div class="map-head">
+                            <b>Explorador territorial</b>
+                            <span id="source-status">
+                                Conectando con los datos…
+                            </span>
+                        </div>
+
+
+                        <!-- CONTENEDOR DEL MAPA INTEGRADO -->
+                        <div class="mapa-integrado">
+
+                            <!-- CONTROLES DEL MAPA -->
+                            <div class="mapa-controles">
+
+                                <label>
+                                    Indicador
+
+                                    <select id="mapa-indicador">
+                                        <option value="energia_mwh">
+                                            Energía entregada (MWh)
+                                        </option>
+
+                                        <option value="horas_promedio">
+                                            Horas de servicio al día
+                                        </option>
+
+                                        <option value="localidades">
+                                            Localidades atendidas
+                                        </option>
+
+                                        <option value="pct_menos_12h">
+                                            Localidades con menos de 12 h (%)
+                                        </option>
+                                    </select>
+                                </label>
+
+
+                                <label>
+                                    Periodo
+
+                                    <select id="mapa-anio">
+                                        <option value="">Últimos 12 meses</option>
+                                    </select>
+                                </label>
+
+
+                                <label>
+                                    Ver por
+
+                                    <span class="segmento" id="mapa-nivel">
+
+                                        <button
+                                            type="button"
+                                            data-nivel="departamento"
+                                            aria-pressed="true">
+                                            Departamentos
+                                        </button>
+
+                                        <button
+                                            type="button"
+                                            data-nivel="municipio"
+                                            aria-pressed="false">
+                                            Municipios
+                                        </button>
+
+                                    </span>
+                                </label>
+
+                            </div>
+
+
+                            <!-- BUSCADOR PRINCIPAL -->
+                            <form
+                                id="b-form"
+                                class="busqueda-principal"
+                                autocomplete="off">
+
+                                <label class="busqueda-rapida">
+                                    <span>Buscar territorio</span>
+
+                                    <input
+                                        id="b-q"
+                                        type="search"
+                                        list="b-sugerencias"
+                                        placeholder="Departamento, municipio o localidad…">
+
+                                    <datalist id="b-sugerencias"></datalist>
+                                </label>
+
+                                <button class="btn" type="submit">
+                                    Buscar
+                                </button>
+
+                                <button
+                                    class="btn sec"
+                                    type="button"
+                                    id="b-limpiar">
+                                    Limpiar
+                                </button>
+
+                            </form>
+
+
+                            <!-- FILTROS AVANZADOS -->
+                            <details class="filtros-avanzados">
+
+                                <summary>
+                                    Filtros avanzados de registros
+                                </summary>
+
+                                <div class="filtros filtros-territorio">
+
+                                    <label>
+                                        Departamento
+                                        <select id="b-dep"></select>
+                                    </label>
+
+                                    <label>
+                                        Municipio
+                                        <select id="b-mun"></select>
+                                    </label>
+
+                                    <label>
+                                        Localidad (comunidad)
+                                        <select id="b-loc"></select>
+                                    </label>
+
+                                    <label>
+                                        Año
+                                        <select id="b-anio"></select>
+                                    </label>
+
+                                    <label>
+                                        Mes
+                                        <select id="b-mes"></select>
+                                    </label>
+
+                                    <label>
+                                        Ordenar por
+
+                                        <select id="b-orden">
+                                            <option value="reciente">
+                                                Más recientes primero
+                                            </option>
+
+                                            <option value="lugar">
+                                                Lugar
+                                            </option>
+
+                                            <option value="energia">
+                                                Mayor energía
+                                            </option>
+                                        </select>
+                                    </label>
+
+                                </div>
+
+                            </details>
+
+
+                            <!-- MAPA Y DETALLE -->
+                            <div class="mapa-rejilla">
+
+                                <div class="mapa-zona" id="mapa-zona">
+
+                                    <svg
+                                        id="mapa-svg"
+                                        viewBox="0 0 558 766"
+                                        role="group"
+                                        aria-label="Mapa de calor de Colombia">
+                                    </svg>
+
+                                    <div
+                                        class="leyenda"
+                                        id="mapa-leyenda">
+                                    </div>
+
+                                </div>
+
+
+                                <div
+                                    class="detalle-lugar"
+                                    id="mapa-detalle"
+                                    aria-live="polite">
+
+                                    Cargando información territorial…
+
+                                </div>
+
+                            </div>
+
+
+                            <!-- FUENTE Y AYUDA -->
+                            <p class="nota" id="mapa-fuente"></p>
+
+                            <div
+                                id="tip"
+                                class="mapa-tip"
+                                style="display:none">
+                            </div>
+
+
+                            <!-- REGISTROS DEL TERRITORIO -->
+                            <!-- Se conserva el HTML, pero permanece oculto mediante CSS -->
+                            <div class="panel-registros-integrado">
+
+                                <div class="titulo-fila">
+
+                                    <div>
+                                        <b>Registros energéticos del territorio</b>
+
+                                        <p class="ayuda">
+                                            Consulta los registros mensuales que coinciden con tu búsqueda.
+                                        </p>
+                                    </div>
+
+                                    <a
+                                        id="b-csv"
+                                        href="/api/territorio/registros.csv"
+                                        hidden>
+                                        ↓ Descargar CSV
+                                    </a>
+
+                                </div>
+
+                                <div id="b-resultados"></div>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- INDICADORES TERRITORIALES -->
+                        <!-- Se conservan, pero permanecen ocultos mediante CSS -->
+                        <div
+                            class="territory-stats"
+                            id="territory-stats">
+
+                            <div>
+                                <b>—</b>
+                                <small>Registros</small>
+                            </div>
+
+                            <div>
+                                <b>—</b>
+                                <small>Localidades</small>
+                            </div>
+
+                            <div>
+                                <b>—</b>
+                                <small>Energía (MWh)</small>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- TARJETA DE ANÁLISIS -->
+                    <div class="analysis-card">
+
+                        <!-- FILTROS GENERALES -->
+                        <div class="filters">
+
+                            <label>
+                                Departamento
+                                <select id="departamento">
+                                    <option value="">Cargando…</option>
+                                </select>
+                            </label>
+
+                            <label>
+                                Municipio
+                                <select id="municipio" disabled>
+                                    <option value="">Todos</option>
+                                </select>
+                            </label>
+
+                            <label>
+                                Localidad
+                                <select id="localidad" disabled>
+                                    <option value="">Todas</option>
+                                </select>
+                            </label>
+
+                        </div>
+
+
+                        <!-- PESTAÑAS -->
+                        <div class="tabs">
+
+                            <button
+                                class="tab active"
+                                data-tab="prediccion">
+                                ▥ Modelo predictivo
+                            </button>
+
+                            <button
+                                class="tab"
+                                data-tab="historico">
+                                ▤ Datos históricos
+                            </button>
+
+                            <button
+                                class="tab"
+                                data-tab="ayuda">
+                                ⓘ Instrucciones
+                            </button>
+
+                        </div>
+
+
+                        <!-- MODELO PREDICTIVO -->
+                        <div
+                            class="prediction-layout"
+                            id="tab-prediccion">
+
+                            <div class="model-config">
+
+                                <h3>⚙ Configura la predicción</h3>
+
+                                <p>
+                                    Carga tus registros energéticos. ZNI-APP comprobará
+                                    automáticamente si cumplen los requisitos del modelo.
+                                </p>
+
+
+                                <label
+                                    class="file-drop"
+                                    for="prediction-file">
+
+                                    <span class="upload-icon">↑</span>
+
+                                    <b id="file-name">
+                                        Selecciona tu archivo CSV o Excel
+                                    </b>
+
+                                    <small>
+                                        Formato .csv, .xlsx o .xls · Máximo 20 MB
+                                    </small>
+
+                                    <input
+                                        id="prediction-file"
+                                        type="file"
+                                        accept=".csv,.xlsx,.xls">
+
+                                </label>
+
+
+                                <button
+                                    class="btn validate-btn"
+                                    id="validate-file"
+                                    type="button">
+
+                                    ✓ &nbsp;Validar documento
+
+                                </button>
+
+
+                                <div
+                                    id="validation-results"
+                                    class="validation-results"
+                                    aria-live="polite">
+
+                                    <b>Tu documento aún no ha sido validado</b>
+
+                                    <span>
+                                        Selecciona un archivo y pulsa «Validar documento»
+                                        para revisar su estructura y compatibilidad.
+                                    </span>
+
+                                </div>
+
+
+                                <label>
+                                    Horizonte disponible
+
+                                    <select id="horizon" disabled>
+                                        <option>
+                                            Mes siguiente al último periodo del archivo
+                                        </option>
+                                    </select>
+                                </label>
+
+
+                                <button
+                                    class="btn run-btn"
+                                    id="run-prediction"
+                                    disabled>
+
+                                    ▶ &nbsp;Ejecutar predicción
+
+                                </button>
+
+
+                                <p class="fineprint">
+                                    El archivo debe cumplir el esquema de variables del
+                                    modelo activo. El sistema valida su compatibilidad
+                                    antes de predecir.
+                                </p>
+
+                            </div>
+
+
+                            <!-- RESULTADOS -->
+                            <div class="chart-panel">
+
+                                <div class="chart-title">
+
+                                    <div>
+                                        <h3>Resultados de la predicción</h3>
+
+                                        <small id="chart-subtitle">
+                                            Los resultados aparecerán después de ejecutar el modelo.
+                                        </small>
+                                    </div>
+
+                                    <span class="legend">
+                                        <i></i> Predicción
+                                    </span>
+
+                                </div>
+
+
+                                <div
+                                    id="prediction-results"
+                                    class="empty-chart">
+
+                                    <div class="empty-icon">⌁</div>
+
+                                    <b>Tu análisis aparecerá aquí</b>
+
+                                    <span>
+                                        Selecciona un archivo preparado y ejecuta la predicción.
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- DATOS HISTÓRICOS -->
+                        <div
+                            class="history-panel"
+                            id="tab-historico"
+                            hidden>
+
+                            <div class="history-heading">
+
+                                <div>
+                                    <h3>Comportamiento histórico</h3>
+
+                                    <p id="history-label">
+                                        Selecciona un departamento para consultar sus datos.
+                                    </p>
+                                </div>
+
+                                <span class="data-pill">
+                                    Datos oficiales disponibles
+                                </span>
+
+                            </div>
+
+                            <div
+                                id="history-results"
+                                class="history-empty">
+
+                                Los indicadores históricos se cargarán según
+                                el territorio seleccionado.
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- INSTRUCCIONES -->
+                        <div
+                            class="help-panel"
+                            id="tab-ayuda"
+                            hidden>
+
+                            <h3>Antes de generar una predicción</h3>
+
+                            <ol>
+                                <li>
+                                    Selecciona el departamento, municipio y localidad
+                                    que deseas estudiar.
+                                </li>
+
+                                <li>
+                                    Prepara un archivo con las variables del esquema del modelo.
+                                </li>
+
+                                <li>
+                                    Carga el archivo CSV o Excel en el módulo predictivo.
+                                </li>
+
+                                <li>
+                                    Ejecuta la predicción y revisa la validación,
+                                    resultados e intervalos de confianza.
+                                </li>
+
+                                <li>
+                                    Descarga los resultados en CSV, Excel o reporte HTML.
+                                </li>
+                            </ol>
+
+                            <a
+                                href="/docs"
+                                target="_blank"
+                                rel="noopener">
+
+                                Consultar documentación técnica de la API ↗
+
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- AVISO -->
+                <div class="disclaimer">
+
+                    La selección territorial permite consultar los registros históricos.
+                    La predicción se calcula con el archivo compatible que se carga en
+                    el modelo; no se inventan resultados cuando faltan variables.
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- INSTRUCCIONES GENERALES -->
+        <section class="steps-section" id="instrucciones">
+
+            <div class="wrap steps-wrap">
+
+                <div class="steps-art">
+
+                    <div class="screen-art">
+                        <span>ϟ</span>
+
+                        <div class="bars">
+                            <i></i>
+                            <i></i>
+                            <i></i>
+                            <i></i>
+                            <i></i>
+                        </div>
+                    </div>
+
+                </div>
+
+
+                <div class="steps-content">
+
+                    <p class="eyebrow green">
+                        INSTRUCCIONES DE USO
+                    </p>
+
+                    <h2>¿Cómo usar ZNI-APP?</h2>
+
+                    <div class="steps-grid">
+
+                        <article>
+                            <b>1</b>
+                            <h3>Selecciona el territorio</h3>
+                            <p>Elige departamento, municipio y localidad.</p>
+                        </article>
+
+                        <article>
+                            <b>2</b>
+                            <h3>Consulta los datos</h3>
+                            <p>Revisa los registros históricos disponibles.</p>
+                        </article>
+
+                        <article>
+                            <b>3</b>
+                            <h3>Ejecuta la predicción</h3>
+                            <p>Carga un archivo compatible y ejecuta el modelo.</p>
+                        </article>
+
+                        <article>
+                            <b>4</b>
+                            <h3>Analiza resultados</h3>
+                            <p>Visualiza las estimaciones y descarga los reportes.</p>
+                        </article>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- SOBRE EL PROYECTO -->
+        <section class="about-section" id="proyecto">
+
+            <div class="wrap">
+
+                <p class="eyebrow">SOBRE EL PROYECTO</p>
+
+                <h2>
+                    Inteligencia de datos para la gestión energética en las
+                    <em>ZNI</em>
+                </h2>
+
+                <p>
+                    ZNI-APP es una plataforma académica y tecnológica que integra
+                    análisis exploratorio, validación de datos y modelos predictivos
+                    para apoyar la comprensión y planificación de la demanda energética
+                    en las Zonas No Interconectadas de Colombia.
+                </p>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- FOOTER -->
+    <footer>
+
+        <div class="wrap footer-row">
+
+            <b>ZNI-APP</b>
+
+            <span>
+                Plataforma de inteligencia energética · Colombia
+            </span>
+
+            <a href="/ingresar.html">
+                Administración
+            </a>
+
+        </div>
+
+    </footer>
+
+
+    <!-- NOTIFICACIONES -->
+    <div
+        class="toast"
+        id="toast"
+        role="status">
+    </div>
+
+
+    <!-- JAVASCRIPT -->
+    <!-- Primero se carga el portal y después el mapa -->
+    <script src="/js/portal.js"></script>
+    <script src="/js/mapa.js"></script>
+
+</body>
+</html>

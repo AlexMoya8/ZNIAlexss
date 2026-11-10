@@ -7,3 +7,5 @@ datos/seguridad/
 .env
 .env.*
 !.env.render.example
+# Archivos CSV originales
+datos/crudos/*.csv

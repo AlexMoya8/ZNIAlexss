@@ -1,48 +1,429 @@
-/* Mapa de calor y buscador por territorio. Usa los colores de estilos.css. */
-:root { --m0: #dbe8f8; --m1: #a9c8ef; --m2: #6fa2e2; --m3: #3a78cc; --m4: #1b4f99; --m-sd: #c9c8c0; --m-fuera: #ecebe6; }
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) { --m0: #1c2c42; --m1: #21477a; --m2: #2f6bb5; --m3: #5592e0; --m4: #9cc3f3; --m-sd: #55544f; --m-fuera: #262624; }
-}
-:root[data-theme="dark"] { --m0: #1c2c42; --m1: #21477a; --m2: #2f6bb5; --m3: #5592e0; --m4: #9cc3f3; --m-sd: #55544f; --m-fuera: #262624; }
 
-.mapa-controles { display: flex; flex-wrap: wrap; gap: 12px 18px; align-items: end; margin-bottom: 14px; }
-.mapa-controles label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; font-weight: 600; color: var(--ink-2); }
-.segmento { display: inline-flex; background: var(--panel-2); border-radius: 9px; padding: 3px; }
-.segmento button { border: none; background: none; font: inherit; font-size: 14px; padding: 6px 12px; border-radius: 7px; color: var(--ink-2); cursor: pointer; }
-.segmento button[aria-pressed="true"] { background: var(--panel); color: var(--ink); font-weight: 600; box-shadow: 0 1px 3px rgba(0,0,0,.1); }
-.mapa-rejilla { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 18px; align-items: start; }
-.mapa-zona { position: relative; }
-#mapa-svg { width: 100%; height: auto; display: block; max-height: 78vh; }
-#mapa-svg path.lugar { stroke: var(--panel); stroke-width: .8; stroke-linejoin: round; transition: opacity .12s; }
-#mapa-svg path.con-datos { cursor: pointer; }
-#mapa-svg path.con-datos:hover, #mapa-svg path.con-datos:focus { opacity: .8; outline: none; }
-#mapa-svg path.sel { stroke: var(--ink); stroke-width: 2; }
-#mapa-svg path.borde-dep { fill: none; stroke: var(--ink-3); stroke-width: .6; pointer-events: none; opacity: .7; }
-#mapa-svg path.toque { fill: transparent; stroke: transparent; stroke-width: 16; cursor: pointer; }
-.c0 { fill: var(--m0); background: var(--m0); } .c1 { fill: var(--m1); background: var(--m1); } .c2 { fill: var(--m2); background: var(--m2); }
-.c3 { fill: var(--m3); background: var(--m3); } .c4 { fill: var(--m4); background: var(--m4); }
-.sd { fill: var(--m-sd); background: var(--m-sd); } .fuera { fill: var(--m-fuera); background: var(--m-fuera); }
-.mapa-recuadro { fill: none; stroke: var(--line); stroke-dasharray: 3 3; }
-.mapa-rotulo { fill: var(--ink-3); font-size: 10px; font-family: inherit; }
-.mapa-rotulo.chico { font-size: 9px; }
-.leyenda { margin-top: 10px; font-size: 13px; }
-.leyenda .escala { display: flex; flex-wrap: wrap; gap: 6px 14px; margin: 6px 0; }
-.leyenda .escala span { display: inline-flex; align-items: center; gap: 6px; color: var(--ink-2); }
-.leyenda i { width: 14px; height: 14px; border-radius: 3px; display: inline-block; border: 1px solid var(--line); }
-.leyenda .nota { margin: 4px 0 0; }
-.detalle-lugar h2 { font-size: 22px; margin: 0; letter-spacing: -.01em; }
-.detalle-lugar .sobre { margin: 0 0 2px; font-size: 12px; text-transform: uppercase; letter-spacing: .06em; font-weight: 700; color: var(--acc); }
-.detalle-lugar .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-.detalle-lugar .tabla { max-height: 260px; overflow-y: auto; }
-.serie .linea { fill: none; stroke: var(--serie); stroke-width: 1.8; }
-.serie .area { fill: var(--serie-suave); opacity: .45; }
-.filtros { display: grid; grid-template-columns: 2fr repeat(3, minmax(0, 1fr)); gap: 12px; }
-.filtros label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; font-weight: 600; color: var(--ink-2); min-width: 0; }
-.filtros input, .filtros select { width: 100%; font: inherit; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px;
-  background: var(--panel); color: var(--ink); min-width: 0; }
-.filtros input:focus, .filtros select:focus { outline: 2px solid var(--acc-2); border-color: var(--acc); }
-.filtros .ancho2 { grid-column: span 2; }
-.resumen-busqueda { margin: 16px 0 4px; }
-.paginador { display: flex; align-items: center; justify-content: center; gap: 14px; margin-top: 10px; font-size: 14px; color: var(--ink-2); }
-@media (max-width: 1000px) { .mapa-rejilla { grid-template-columns: 1fr; } #mapa-svg { max-height: none; max-width: 560px; margin: 0 auto; } }
-@media (max-width: 700px) { .filtros { grid-template-columns: 1fr 1fr; } .filtros .ancho2, .filtros .q { grid-column: 1 / -1; } }
+/* =========================================================
+   ZNI-APP | MAPA TERRITORIAL
+   Estilos generales del mapa de calor y buscador.
+   ========================================================= */
+
+:root {
+  --m0: #dbe8f8;
+  --m1: #a9c8ef;
+  --m2: #6fa2e2;
+  --m3: #3a78cc;
+  --m4: #1b4f99;
+  --m-sd: #c9c8c0;
+  --m-fuera: #ecebe6;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --m0: #1c2c42;
+    --m1: #21477a;
+    --m2: #2f6bb5;
+    --m3: #5592e0;
+    --m4: #9cc3f3;
+    --m-sd: #55544f;
+    --m-fuera: #262624;
+  }
+}
+
+:root[data-theme="dark"] {
+  --m0: #1c2c42;
+  --m1: #21477a;
+  --m2: #2f6bb5;
+  --m3: #5592e0;
+  --m4: #9cc3f3;
+  --m-sd: #55544f;
+  --m-fuera: #262624;
+}
+
+/* CONTROLES */
+
+.mapa-controles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px 20px;
+  align-items: end;
+  margin-bottom: 18px;
+}
+
+.mapa-controles label {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink-2);
+}
+
+.segmento {
+  display: inline-flex;
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 4px;
+}
+
+.segmento button {
+  border: none;
+  background: none;
+  font: inherit;
+  font-size: 12px;
+  padding: 9px 15px;
+  border-radius: 7px;
+  color: var(--ink-2);
+  cursor: pointer;
+  transition: .2s ease;
+}
+
+.segmento button:hover {
+  color: var(--acc);
+}
+
+.segmento button[aria-pressed="true"] {
+  background: var(--panel);
+  color: var(--acc);
+  font-weight: 700;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, .08);
+}
+
+/* MAPA Y DETALLE */
+
+.mapa-rejilla {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(300px, .85fr);
+  gap: 24px;
+  align-items: start;
+}
+
+.mapa-zona {
+  position: relative;
+  min-width: 0;
+}
+
+#mapa-svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  max-height: 780px;
+}
+
+#mapa-svg path.lugar {
+  stroke: var(--panel);
+  stroke-width: .8;
+  stroke-linejoin: round;
+  transition: opacity .15s, stroke-width .15s;
+}
+
+#mapa-svg path.con-datos {
+  cursor: pointer;
+}
+
+#mapa-svg path.con-datos:hover,
+#mapa-svg path.con-datos:focus {
+  opacity: .8;
+  outline: none;
+}
+
+#mapa-svg path.sel {
+  stroke: var(--ink);
+  stroke-width: 2.2;
+}
+
+#mapa-svg path.borde-dep {
+  fill: none;
+  stroke: var(--ink-3);
+  stroke-width: .6;
+  pointer-events: none;
+  opacity: .7;
+}
+
+#mapa-svg path.toque {
+  fill: transparent;
+  stroke: transparent;
+  stroke-width: 16;
+  cursor: pointer;
+}
+
+/* ESCALA DE COLORES */
+
+.c0 {
+  fill: var(--m0);
+  background: var(--m0);
+}
+
+.c1 {
+  fill: var(--m1);
+  background: var(--m1);
+}
+
+.c2 {
+  fill: var(--m2);
+  background: var(--m2);
+}
+
+.c3 {
+  fill: var(--m3);
+  background: var(--m3);
+}
+
+.c4 {
+  fill: var(--m4);
+  background: var(--m4);
+}
+
+.sd {
+  fill: var(--m-sd);
+  background: var(--m-sd);
+}
+
+.fuera {
+  fill: var(--m-fuera);
+  background: var(--m-fuera);
+}
+
+.mapa-recuadro {
+  fill: none;
+  stroke: var(--line);
+  stroke-dasharray: 3 3;
+}
+
+.mapa-rotulo {
+  fill: var(--ink-3);
+  font-size: 10px;
+  font-family: inherit;
+}
+
+.mapa-rotulo.chico {
+  font-size: 9px;
+}
+
+/* LEYENDA */
+
+.leyenda {
+  margin-top: 16px;
+  font-size: 12px;
+}
+
+.leyenda .escala {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px 15px;
+  margin: 10px 0;
+}
+
+.leyenda .escala span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--ink-2);
+}
+
+.leyenda i {
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  display: inline-block;
+  border: 1px solid var(--line);
+  flex-shrink: 0;
+}
+
+.leyenda .nota {
+  margin: 7px 0 0;
+  line-height: 1.6;
+}
+
+/* DETALLE TERRITORIAL */
+
+.detalle-lugar h2,
+#mapa-detalle h2 {
+  font-size: 25px;
+  margin: 0;
+  letter-spacing: -.02em;
+}
+
+.detalle-lugar .sobre,
+#mapa-detalle .sobre {
+  margin: 0 0 5px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  font-weight: 800;
+  color: var(--acc);
+}
+
+.detalle-lugar .kpis,
+#mapa-detalle .kpis {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.detalle-lugar .tabla,
+#mapa-detalle .mapa-tabla {
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.serie .linea {
+  fill: none;
+  stroke: var(--serie);
+  stroke-width: 1.8;
+}
+
+.serie .area {
+  fill: var(--serie-suave);
+  opacity: .45;
+}
+
+/* FILTROS */
+
+.filtros {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 13px;
+}
+
+.filtros label {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink-2);
+  min-width: 0;
+}
+
+.filtros input,
+.filtros select {
+  width: 100%;
+  font: inherit;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--panel);
+  color: var(--ink);
+  min-width: 0;
+}
+
+.filtros input:focus,
+.filtros select:focus {
+  outline: 2px solid var(--acc-2);
+  border-color: var(--acc);
+}
+
+.filtros .ancho2 {
+  grid-column: span 2;
+}
+
+/* TABLAS */
+
+.mapa-tabla {
+  width: 100%;
+  overflow: auto;
+}
+
+.mapa-tabla table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.mapa-tabla th,
+.mapa-tabla td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.mapa-tabla th {
+  color: var(--ink-2);
+  font-size: 11px;
+  font-weight: 800;
+  background: var(--panel-2);
+}
+
+.mapa-tabla td {
+  font-size: 12px;
+}
+
+.mapa-tabla tr:hover td {
+  background: var(--panel-2);
+}
+
+/* RESULTADOS Y PAGINACIÓN */
+
+.resumen-busqueda {
+  margin: 16px 0 8px;
+  color: var(--ink-2);
+  font-size: 13px;
+}
+
+.paginador {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin-top: 16px;
+  font-size: 13px;
+  color: var(--ink-2);
+}
+
+@media (max-width: 1100px) {
+  .mapa-rejilla {
+    grid-template-columns: minmax(0, 1fr) minmax(260px, .85fr);
+    gap: 16px;
+  }
+}
+
+@media (max-width: 850px) {
+  .mapa-rejilla {
+    grid-template-columns: 1fr;
+  }
+
+  #mapa-svg {
+    max-height: none;
+    max-width: 620px;
+    margin: 0 auto;
+  }
+
+  .filtros {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .mapa-controles {
+    align-items: stretch;
+  }
+
+  .mapa-controles label {
+    width: 100%;
+  }
+
+  .segmento {
+    width: max-content;
+    max-width: 100%;
+  }
+
+  .segmento button {
+    padding: 8px 10px;
+  }
+
+  .filtros {
+    grid-template-columns: 1fr;
+  }
+
+  .filtros .ancho2,
+  .filtros .q {
+    grid-column: 1;
+  }
+
+  .detalle-lugar .kpis,
+  #mapa-detalle .kpis {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .paginador {
+    flex-wrap: wrap;
+  }
+}
